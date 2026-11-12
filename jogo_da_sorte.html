@@ -121,7 +121,7 @@
       <p class="gps-coords" id="gpsCoordinates"></p>
       <a class="map-link" id="mapLink" href="#" target="_blank" rel="noopener">MOSTRAR NO MAPA</a>
     </div>
-    <p class="hint">Até lá, podes tentar adivinhar. Mas algumas surpresas são melhores quando ficam em segredo.</p>
+    <p class="hint" id="msgdofinal">Até lá, podes tentar adivinhar, pois algumas surpresas sabem melhores quando ficam em segredo.</p>
   </section>
   <footer>Uma surpresa pensada especialmente só para ti</footer>
 </main>
@@ -369,6 +369,7 @@ function startCountdown() {
       $("msgpremio").textContent = "Conseguiste chegar até aqui. Já sabes qual é a surpresa?";
       $("msgpremiobold").textContent = "Esta a ser preparado especialmente para ti, mas ainda que envolto em mistério.";
       $("msgrevelacao").textContent = "DIAS ATÉ À PRÓXIMA REVELAÇÃO";
+      $("msgdofinal").textContent = "Até lá, podes tentar adivinhar, pois algumas surpresas sabem melhores quando ficam em segredo.";
       $("daysLeft").textContent = days;
       $("countDetail").textContent =
         `Faltam ${days} dias e ${hours} horas. Nessa noite, novas revelações acerca do teu prémio vão surgir.`;
@@ -385,6 +386,7 @@ function startCountdown() {
       $("msgpremio").textContent = "Conseguiste chegar ao fim, mas vais ter de ter um pouco mais de paciência.";
       $("msgpremiobold").textContent = "Ainda não esta pronto, mas não deves de desanimar. Toma lá mais estas pistas.";
       $("msgrevelacao").textContent = "DIAS ATÉ À REVELAÇÃO FINAL";
+      $("msgdofinal").textContent = "Trago anéis da Alemanha, sem nunca ter participado nass Olimpíadas. Ouve é meu nome...";
       $("daysLeft").textContent = days;
       $("countDetail").textContent =
         `Faltam ${days} dias e ${hours} horas para poderes reclamar o teu prémio!`;
