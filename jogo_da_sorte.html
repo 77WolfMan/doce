@@ -192,32 +192,34 @@ async function resetJogo() {
 /* =========================================================
    SISTEMA DE ÁUDIO
    ========================================================= */
-const successSound = new Audio("Aplausos.mp3");
+const successSound = new Audio(
+  new URL("./Aplausos.mp3", document.baseURI).href
+);
 successSound.preload = "auto";
 successSound.volume = 0.85;
+const wrongSound = new Audio(
+  new URL("./Errado.mp3", document.baseURI).href
+);
+wrongSound.preload = "auto";
+wrongSound.volume = 0.85;
+
 function playSuccessSound() {
   successSound.pause();
   successSound.currentTime = 0;
-  const playback = successSound.play();
-  if (playback !== undefined) {
-    playback.catch(error => {
-      console.error("Não foi possível reproduzir os aplausos:", error);
-    });
-  }
+
+  sucessSound.play().catch(error => {
+    console.error("Erro na reprodução dos aplausos:", error);
+    console.error("Ficheiro:", successSound.src);
+  });
 }
 
-const wrongSound = new Audio("Errado.mp3");
-wrongSound.preload = "auto";
-wrongSound.volume = 0.85;
 function playWrongSound() {
   wrongSound.pause();
   wrongSound.currentTime = 0;
-  const playback = wrongSound.play();
-  if (playback !== undefined) {
-    playback.catch(error => {
-      console.error("Não foi possível reproduzir o som de erro:", error);
-    });
-  }
+  wrongSound.play().catch(error => {
+    console.error("Erro na reprodução do som de erro:", error);
+    console.error("Ficheiro:", wrongSound.src);
+  });
 }
 
 /* =========================================================
@@ -510,8 +512,8 @@ window.addEventListener("resize", resizeCanvas);
 resizeCanvas();
 
 function launchConfetti() {
-  if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
   playSuccessSound();
+  if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
   const width = window.innerWidth;
   const height = window.innerHeight;
   for (let i = 0; i < 800; i++) {
