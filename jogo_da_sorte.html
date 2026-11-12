@@ -108,7 +108,7 @@
   <section class="game-card success hidden" id="finalScreen">
     <div class="trophy">✦</div>
     <div class="eyebrow">MISSÃO CONCLUÍDA</div>
-    <h2>O grande prémio é teu!</h2>
+    <h2 id="prémio">O grande prémio é quase teu!</h2>
    <p>Conseguiste chegar ao fim. Já sabes qual é a surpresa?</p>
     <p><strong>Esta a ser preparado especialmente para ti, mas ainda que envolto em mistério.</strong></p>
     <div class="count-panel">
@@ -135,10 +135,6 @@
    ========================================================= */
 
 const CONFIG = {
-  // Momento em que as coordenadas serão reveladas.
-  // 20:00 de Lisboa em 24/12/2026 (Portugal continental está em UTC nessa data).
-  revealDate: "2026-12-24T20:00:00+00:00",
-
   // SUBSTITUI pelos valores reais antes de publicares o site.
   gpsCoordinates: "41.11525525738545, -8.628557681014332",
 
@@ -381,6 +377,7 @@ function startCountdown() {
       const distance = secondTarget - now;
       const days = Math.floor(distance / 86400000);
       const hours = Math.floor((distance % 86400000) / 3600000);
+      $("prémio").textContente = 'O grande prémio é teu!';
       $("daysLeft").textContent = days;
       $("countDetail").textContent =
         `Faltam ${days} dias e ${hours} horas para poderes reclamar o teu prémio!`;
