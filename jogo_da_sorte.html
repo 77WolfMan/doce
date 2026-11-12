@@ -377,7 +377,7 @@ function startCountdown() {
       const distance = secondTarget - now;
       const days = Math.floor(distance / 86400000);
       const hours = Math.floor((distance % 86400000) / 3600000);
-      $("prémio").textContente = 'O grande prémio é teu!';
+      $("prémio").textContent = "O grande prémio é teu!";
       $("daysLeft").textContent = days;
       $("countDetail").textContent =
         `Faltam ${days} dias e ${hours} horas para poderes reclamar o teu prémio!`;
