@@ -108,7 +108,7 @@
   <section class="game-card success hidden" id="finalScreen">
     <div class="trophy">✦</div>
     <div class="eyebrow">MISSÃO CONCLUÍDA</div>
-    <h2>O grande prémio é teu!</h2>
+    <h2 id="frasepremio">O grande prémio esta a um passo!</h2>
    <p>Conseguiste chegar ao fim. Já sabes qual é a surpresa?</p>
     <p><strong>Esta a ser preparado especialmente para ti, mas ainda que envolto em mistério.</strong></p>
     <div class="count-panel">
@@ -365,6 +365,7 @@ function startCountdown() {
       const distance = firstTarget - now;
       const days = Math.floor(distance / 86400000);
       const hours = Math.floor((distance % 86400000) / 3600000);
+      $("frasepremio").textContent = "O grande prémio esta a um passo!";
       $("daysLeft").textContent = days;
       $("countDetail").textContent =
         `Faltam ${days} dias e ${hours} horas. Nessa noite, novas revelações acerca do teu prémio vão surgir.`;
@@ -377,6 +378,7 @@ function startCountdown() {
       const distance = secondTarget - now;
       const days = Math.floor(distance / 86400000);
       const hours = Math.floor((distance % 86400000) / 3600000);
+      $("frasepremio").textContent = "O grande prémio é teu!";
       $("daysLeft").textContent = days;
       $("countDetail").textContent =
         `Faltam ${days} dias e ${hours} horas para poderes reclamar o teu prémio!`;
