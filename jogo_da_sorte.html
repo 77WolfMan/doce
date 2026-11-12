@@ -113,7 +113,7 @@
     <p id="msgpremiobold"><strong>Esta a ser preparado especialmente para ti, mas ainda que envolto em mistério.</strong></p>
     <div class="count-panel">
       <div class="count-number" id="daysLeft">--</div>
-      <div class="count-caption">DIAS ATÉ À REVELAÇÃO</div>
+      <div class="count-caption" id="msgrevelacao">DIAS ATÉ À PRÓXIMA REVELAÇÃO</div>
       <p class="count-detail" id="countDetail">Na noite de 24 de dezembro, será revelado o local onde poderás encontrar o teu prémio.</p>
     </div>
     <div id="gpsBox" class="gps-box hidden">
@@ -368,6 +368,7 @@ function startCountdown() {
       $("frasepremio").textContent = "O grande prémio esta a um passo!";
       $("msgpremio").textContent = "Conseguiste chegar até aqui. Já sabes qual é a surpresa?";
       $("msgpremiobold").textContent = "Esta a ser preparado especialmente para ti, mas ainda que envolto em mistério.";
+      $("msgrevelacao").textContent = "DIAS ATÉ À PRÓXIMA REVELAÇÃO";
       $("daysLeft").textContent = days;
       $("countDetail").textContent =
         `Faltam ${days} dias e ${hours} horas. Nessa noite, novas revelações acerca do teu prémio vão surgir.`;
@@ -383,6 +384,7 @@ function startCountdown() {
       $("frasepremio").textContent = "O grande prémio é teu!";
       $("msgpremio").textContent = "Conseguiste chegar ao fim, mas vais ter de ter um pouco mais de paciência.";
       $("msgpremiobold").textContent = "Ainda não esta pronto, mas não deves de desanimar. Toma lá mais estas pistas.";
+      $("msgrevelacao").textContent = "DIAS ATÉ À REVELAÇÃO FINAL";
       $("daysLeft").textContent = days;
       $("countDetail").textContent =
         `Faltam ${days} dias e ${hours} horas para poderes reclamar o teu prémio!`;
