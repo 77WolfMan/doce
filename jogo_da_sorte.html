@@ -109,7 +109,7 @@
     <div class="trophy">✦</div>
     <div class="eyebrow">MISSÃO CONCLUÍDA</div>
     <h2 id="frasepremio">O grande prémio esta a um passo!</h2>
-   <p>Conseguiste chegar ao fim. Já sabes qual é a surpresa?</p>
+   <p id="msgpremio">Conseguiste chegar até aqui. Já sabes qual é a surpresa?</p>
     <p><strong>Esta a ser preparado especialmente para ti, mas ainda que envolto em mistério.</strong></p>
     <div class="count-panel">
       <div class="count-number" id="daysLeft">--</div>
@@ -366,6 +366,7 @@ function startCountdown() {
       const days = Math.floor(distance / 86400000);
       const hours = Math.floor((distance % 86400000) / 3600000);
       $("frasepremio").textContent = "O grande prémio esta a um passo!";
+      $("msgpremio").textContent = "Conseguiste chegar até aqui. Já sabes qual é a surpresa?";
       $("daysLeft").textContent = days;
       $("countDetail").textContent =
         `Faltam ${days} dias e ${hours} horas. Nessa noite, novas revelações acerca do teu prémio vão surgir.`;
@@ -379,6 +380,7 @@ function startCountdown() {
       const days = Math.floor(distance / 86400000);
       const hours = Math.floor((distance % 86400000) / 3600000);
       $("frasepremio").textContent = "O grande prémio é teu!";
+      ("msgpremio").textContent = "Conseguiste chegar ao fim. Já sabes qual é a surpresa?";
       $("daysLeft").textContent = days;
       $("countDetail").textContent =
         `Faltam ${days} dias e ${hours} horas para poderes reclamar o teu prémio!`;
