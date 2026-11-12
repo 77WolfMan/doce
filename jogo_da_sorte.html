@@ -222,71 +222,27 @@ function playWrongSound() {
 
 /* =========================================================
    SISTEMA DE MEMORIZAÇÃO E SINCRONIZAÇÃO
+   CLOUDFLARE WORKER + GITHUB
    ========================================================= */
 const CONFIG_GITHUB = {
-    modo: "PRODUCAO",
-    utilizador: "DrWE",
-    repositorio: "Grande-Jogo-da-Sorte",
-    branch: "main",
-    ficheiro: "progresso.json",
-    token: "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"
+    api: "https://grande-jogo-api.lobo-paulo.workers.dev"
 };
 const STORAGE_KEY = "grandeJogoDaSorte_progresso";
-let githubFileSHA = null;
-
-/* =========================================================
-   CODIFICAÇÃO DO FICHEIRO JSON
-   ========================================================= */
-function encodeBase64(texto) {
-    const bytes = new TextEncoder().encode(texto);
-    let binary = "";
-    bytes.forEach(byte => {
-        binary += String.fromCharCode(byte);
-    });
-    return btoa(binary);
-}
-
-function decodeBase64(base64) {
-    const binary = atob(base64.replace(/\s/g, ""));
-    const bytes = Uint8Array.from(binary, c => c.charCodeAt(0));
-    return new TextDecoder().decode(bytes);
-}
 
 /* =========================================================
    LER PROGRESSO
    ========================================================= */
 async function lerProgresso() {
-    // MODO TESTE - ARMAZENAMENTO LOCAL
-    if (CONFIG_GITHUB.modo === "TESTE") {
-        const guardado = localStorage.getItem(STORAGE_KEY);
-        if (guardado) {
-            return JSON.parse(guardado);
-        }
-        return {
-            pergunta_atual: 0,
-            perguntas_utilizadas: [],
-            jogo_concluido: false
-        };
-    }
-    // MODO PRODUÇÃO - GITHUB
-    const url =
-        `https://api.github.com/repos/${CONFIG_GITHUB.utilizador}/${CONFIG_GITHUB.repositorio}/contents/${CONFIG_GITHUB.ficheiro}?ref=${CONFIG_GITHUB.branch}`;
-    const resposta = await fetch(url, {
-        headers: {
-            "Authorization": `Bearer ${CONFIG_GITHUB.token}`,
-            "Accept": "application/vnd.github+json",
-            "X-GitHub-Api-Version": "2022-11-28"
-        },
+    const resposta = await fetch(CONFIG_GITHUB.api, {
+        method: "GET",
         cache: "no-store"
     });
     if (!resposta.ok) {
-        throw new Error("Não foi possível ler o progresso no GitHub.");
+        throw new Error("Não foi possível recuperar o progresso.");
     }
-    const ficheiro = await resposta.json();
-    githubFileSHA = ficheiro.sha;
-    return JSON.parse(decodeBase64(ficheiro.content));
+    const progresso = await resposta.json();
+    return progresso;
 }
-
 
 /* =========================================================
    GUARDAR PROGRESSO
@@ -301,48 +257,21 @@ async function guardarProgresso() {
         jogo_concluido: currentQuestion >= CONFIG.questions.length,
         ultima_atualizacao: new Date().toISOString()
     };
-    // MODO TESTE
-    if (CONFIG_GITHUB.modo === "TESTE") {
-        localStorage.setItem(
-            STORAGE_KEY,
-            JSON.stringify(dados)
-        );
-        return true;
-    }
-    // MODO PRODUÇÃO
-    if (!githubFileSHA) {
-        throw new Error("Não foi possível identificar a versão do ficheiro.");
-    }
-    const url =
-        `https://api.github.com/repos/${CONFIG_GITHUB.utilizador}/${CONFIG_GITHUB.repositorio}/contents/${CONFIG_GITHUB.ficheiro}`;
-    const resposta = await fetch(url, {
-        method: "PUT",
+    const resposta = await fetch(CONFIG_GITHUB.api, {
+        method: "POST",
         headers: {
-            "Authorization": `Bearer ${CONFIG_GITHUB.token}`,
-            "Accept": "application/vnd.github+json",
-            "Content-Type": "application/json",
-            "X-GitHub-Api-Version": "2022-11-28"
+            "Content-Type": "application/json"
         },
-        body: JSON.stringify({
-            message: "Atualização automática do progresso do jogo",
-            content: encodeBase64(
-                JSON.stringify(dados, null, 2)
-            ),
-            sha: githubFileSHA,
-            branch: CONFIG_GITHUB.branch
-        })
+        body: JSON.stringify(dados)
     });
-    if (!resposta.ok) {
-        if (resposta.status === 409 || resposta.status === 422) {
-            throw new Error("O progresso foi alterado noutra sessão. Atualiza o jogo antes de continuar.");
-        }
-        throw new Error("Não foi possível atualizar o progresso no GitHub.");
-    }
     const resultado = await resposta.json();
-    githubFileSHA = resultado.content.sha;
+    if (!resposta.ok || !resultado.success) {
+        throw new Error(
+            resultado.error || "Não foi possível guardar o progresso."
+        );
+    }
     return true;
 }
-
 
 /* =========================================================
    MOTOR DO JOGO — não é necessário editar para mudar perguntas.
