@@ -171,6 +171,24 @@ const CONFIG = {
   ]
 };
 
+
+/* =========================================================
+   RESET PROGRESSO
+   ========================================================= */
+async function resetJogo() {
+    if (!confirm("Tens a certeza que pretendes reiniciar o jogo?")) {
+        return;
+    }
+    if (CONFIG_GITHUB.modo === "TESTE") {
+        localStorage.removeItem(STORAGE_KEY);
+    } else {
+        alert("O reset em produção deverá ser feito através da GitHub API.");
+        return;
+    }
+    location.reload();
+}
+
+
 /* =========================================================
    SISTEMA DE ÁUDIO
    ========================================================= */
@@ -200,6 +218,129 @@ function playWrongSound() {
       console.error("Não foi possível reproduzir o som de erro:", error);
     });
   }
+}
+
+/* =========================================================
+   SISTEMA DE MEMORIZAÇÃO E SINCRONIZAÇÃO
+   ========================================================= */
+const CONFIG_GITHUB = {
+    modo: "TESTE",
+    utilizador: "UTILIZADOR",
+    repositorio: "Grande-Jogo-da-Sorte",
+    branch: "main",
+    ficheiro: "progresso.json",
+    token: "COLOCAR_TOKEN_AQUI"
+};
+const STORAGE_KEY = "grandeJogoDaSorte_progresso";
+let githubFileSHA = null;
+
+/* =========================================================
+   CODIFICAÇÃO DO FICHEIRO JSON
+   ========================================================= */
+function encodeBase64(texto) {
+    const bytes = new TextEncoder().encode(texto);
+    let binary = "";
+    bytes.forEach(byte => {
+        binary += String.fromCharCode(byte);
+    });
+    return btoa(binary);
+}
+
+function decodeBase64(base64) {
+    const binary = atob(base64.replace(/\s/g, ""));
+    const bytes = Uint8Array.from(binary, c => c.charCodeAt(0));
+    return new TextDecoder().decode(bytes);
+}
+
+/* =========================================================
+   LER PROGRESSO
+   ========================================================= */
+async function lerProgresso() {
+    // MODO TESTE - ARMAZENAMENTO LOCAL
+    if (CONFIG_GITHUB.modo === "TESTE") {
+        const guardado = localStorage.getItem(STORAGE_KEY);
+        if (guardado) {
+            return JSON.parse(guardado);
+        }
+        return {
+            pergunta_atual: 0,
+            perguntas_utilizadas: [],
+            jogo_concluido: false
+        };
+    }
+    // MODO PRODUÇÃO - GITHUB
+    const url =
+        `https://api.github.com/repos/${CONFIG_GITHUB.utilizador}/${CONFIG_GITHUB.repositorio}/contents/${CONFIG_GITHUB.ficheiro}?ref=${CONFIG_GITHUB.branch}`;
+    const resposta = await fetch(url, {
+        headers: {
+            "Authorization": `Bearer ${CONFIG_GITHUB.token}`,
+            "Accept": "application/vnd.github+json",
+            "X-GitHub-Api-Version": "2022-11-28"
+        },
+        cache: "no-store"
+    });
+    if (!resposta.ok) {
+        throw new Error("Não foi possível ler o progresso no GitHub.");
+    }
+    const ficheiro = await resposta.json();
+    githubFileSHA = ficheiro.sha;
+    return JSON.parse(decodeBase64(ficheiro.content));
+}
+
+
+/* =========================================================
+   GUARDAR PROGRESSO
+   ========================================================= */
+async function guardarProgresso() {
+    const dados = {
+        pergunta_atual: currentQuestion,
+        perguntas_utilizadas: Array.from(
+            { length: currentQuestion },
+            (_, index) => index
+        ),
+        jogo_concluido: currentQuestion >= CONFIG.questions.length,
+        ultima_atualizacao: new Date().toISOString()
+    };
+    // MODO TESTE
+    if (CONFIG_GITHUB.modo === "TESTE") {
+        localStorage.setItem(
+            STORAGE_KEY,
+            JSON.stringify(dados)
+        );
+        return true;
+    }
+    // MODO PRODUÇÃO
+    if (!githubFileSHA) {
+        throw new Error("Não foi possível identificar a versão do ficheiro.");
+    }
+    const url =
+        `https://api.github.com/repos/${CONFIG_GITHUB.utilizador}/${CONFIG_GITHUB.repositorio}/contents/${CONFIG_GITHUB.ficheiro}`;
+    const resposta = await fetch(url, {
+        method: "PUT",
+        headers: {
+            "Authorization": `Bearer ${CONFIG_GITHUB.token}`,
+            "Accept": "application/vnd.github+json",
+            "Content-Type": "application/json",
+            "X-GitHub-Api-Version": "2022-11-28"
+        },
+        body: JSON.stringify({
+            message: "Atualização automática do progresso do jogo",
+            content: encodeBase64(
+                JSON.stringify(dados, null, 2)
+            ),
+            sha: githubFileSHA,
+            branch: CONFIG_GITHUB.branch
+        })
+    });
+    if (!resposta.ok) {
+        if (resposta.status === 409 || resposta.status === 422) {
+            throw new Error("O progresso foi alterado noutra sessão. Atualiza o jogo antes de continuar.");
+        }
+        throw new Error("Não foi possível atualizar o progresso no GitHub.");
+    }
+    const resultado = await resposta.json();
+    githubFileSHA = resultado.content.sha;
+    return true;
 }
 
 
@@ -248,20 +389,34 @@ $("answerForm").addEventListener("submit", (event) => {
       bar.classList.toggle("done", index <= currentQuestion)
     );
     launchConfetti();
-    window.setTimeout(() => {
-      currentQuestion++;
-      if (currentQuestion < CONFIG.questions.length) {
+    
+window.setTimeout(async () => {
+    const perguntaAnterior = currentQuestion;
+    currentQuestion++;
+    try {
+        await guardarProgresso();
+    } catch (error) {
+        currentQuestion = perguntaAnterior;
+        console.error("Erro ao guardar progresso:", error);
+        $("feedback").textContent =
+            "Acertaste, mas não foi possível guardar o progresso. Verifica a ligação e tenta novamente.";
+        $("feedback").className = "feedback error";
+        respostaBloqueada = false;
+        $("answerInput").disabled = false;
+        $("answerForm").querySelector("button").disabled = false;
+        return;
+    }
+    if (currentQuestion < CONFIG.questions.length) {
         renderQuestion();
-      } else {
+    } else {
         $("game").classList.add("hidden");
         $("finalScreen").classList.remove("hidden");
         startCountdown();
-      }
-      // Liberta o formulário para a próxima pergunta
-      respostaBloqueada = false;
-      $("answerInput").disabled = false;
-      $("answerForm").querySelector("button").disabled = false;
-    }, 1000);
+    }
+    respostaBloqueada = false;
+    $("answerInput").disabled = false;
+    $("answerForm").querySelector("button").disabled = false;
+}, 1000);
   } else {
     $("feedback").textContent = "Não seja molengão, joga com o coração. Só avanças se deres a resposta certa...";
     $("feedback").className = "feedback error";
@@ -400,7 +555,40 @@ function animateConfetti() {
 }
 
 
-renderQuestion();
+/* =========================================================
+   INICIALIZAÇÃO DO JOGO
+   ========================================================= */
+async function iniciarJogo() {
+    $("answerInput").disabled = true;
+    $("answerForm").querySelector("button").disabled = true;
+    try {
+        const progresso = await lerProgresso();
+        currentQuestion = Math.max(
+            0,
+            Math.min(
+                Number(progresso.pergunta_atual) || 0,
+                CONFIG.questions.length
+            )
+        );
+        if (currentQuestion >= CONFIG.questions.length) {
+            $("game").classList.add("hidden");
+            $("finalScreen").classList.remove("hidden");
+            startCountdown();
+        } else {
+            renderQuestion();
+            $("answerInput").disabled = false;
+            $("answerForm").querySelector("button").disabled = false;
+        }
+    } catch (error) {
+        console.error(error);
+        $("question").textContent = "Não foi possível recuperar o jogo.";
+        $("feedback").textContent =
+            "Verifica a ligação à Internet e tenta novamente.";
+        $("feedback").className = "feedback error";
+    }
+}
+
+iniciarJogo();
 </script>
 </body>
 </html>
