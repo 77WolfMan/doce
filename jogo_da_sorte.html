@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#10131b">
+<title>O Grande Jogo da Sorte</title>
+<style>
+  :root {
+    --bg:#10131b; --panel:#191f2b; --panel2:#202838; --gold:#e9bd62;
+    --gold2:#ffdf91; --text:#f5f2ea; --muted:#aeb6c5; --line:#343d4d;
+    --good:#72d6a0; --bad:#ff8585;
+  }
+  * { box-sizing:border-box; }
+  body { margin:0; min-height:100vh; color:var(--text);
+    background:
+        linear-gradient(rgba(16,19,27,0.85), rgba(16,19,27,0.65)),
+        url("Fundo.jpg") center center / cover no-repeat fixed;
+
+    font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+    display:flex;
+    justify-content:center;
+    padding:28px 16px 50px;}
+    
+  .wrap { width:min(850px,100%); }
+  header { text-align:center; margin:8px 0 24px; }
+  .eyebrow { color:var(--gold); letter-spacing:.24em; font-size:.72rem; font-weight:700; }
+  h1 { margin:9px 0 7px; font-family:Georgia,serif; font-size:clamp(2rem,7vw,3.35rem); font-weight:500; letter-spacing:.02em; }
+  .subtitle { color:var(--muted); margin:0; font-size:.98rem; }
+  .game-card {
+    background:linear-gradient(145deg,rgba(32,40,56,.97),rgba(22,28,39,.98));
+    border:1px solid rgba(233,189,98,.38); border-radius:22px;
+    padding:clamp(20px,5vw,38px); box-shadow:0 24px 70px #0007;
+  }
+  .topline { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:20px; }
+  .level { color:var(--gold2); font-size:.78rem; letter-spacing:.12em; text-transform:uppercase; }
+  .progress { display:flex; gap:7px; margin:0 0 28px; }
+  .progress span { height:5px; flex:1; background:#3b4556; border-radius:10px; }
+  .progress span.done { background:linear-gradient(90deg,var(--gold),var(--gold2)); }
+  .question-label { color:var(--gold); text-transform:uppercase; letter-spacing:.16em; font-size:.72rem; font-weight:700; }
+  h2 { font-family:Georgia,serif; font-weight:500; font-size:clamp(1.45rem,4vw,2rem); line-height:1.35; margin:12px 0 22px; }
+  .answer-row { display:flex; gap:10px; }
+  input {
+    min-width:0; flex:1; padding:15px 16px; border-radius:12px;
+    border:1px solid #536074; background:#111722; color:white; font-size:1rem;
+    outline:none;
+  }
+  input:focus { border-color:var(--gold); box-shadow:0 0 0 3px #e9bd6226; }
+  button {
+    border:0; border-radius:12px; padding:14px 20px; cursor:pointer;
+    background:linear-gradient(135deg,var(--gold2),var(--gold)); color:#211a0d;
+    font-weight:800; font-size:.95rem; min-height:50px;
+  }
+  button:hover { filter:brightness(1.06); }
+  button:focus-visible { outline:3px solid white; outline-offset:3px; }
+  .feedback { min-height:28px; margin:13px 0 0; color:var(--muted); font-size:.9rem; }
+  .feedback.error { color:var(--bad); }
+  .hint { margin-top:18px; padding-top:16px; border-top:1px solid var(--line); color:var(--muted); font-size:.83rem; }
+  .hidden { display:none !important; }
+  .success { text-align:center; }
+  .success .trophy { font-size:3rem; margin:4px 0 10px; }
+  .success h2 { color:var(--gold2); }
+  .count-panel { margin:24px 0 14px; padding:22px 14px; border:1px solid #8c7447; border-radius:16px; background:#11172299; }
+  .count-number { color:var(--gold2); font-size:clamp(2.5rem,10vw,4.5rem); font-weight:750; line-height:1; font-variant-numeric:tabular-nums; }
+  .count-caption { margin-top:9px; color:var(--muted); text-transform:uppercase; letter-spacing:.18em; font-size:.72rem; }
+  .count-detail { color:var(--muted); margin:12px 0 0; font-size:.85rem; }
+  .gps-box { margin-top:22px; padding:20px; border-radius:15px; border:1px dashed var(--gold); background:#e9bd6210; }
+  .gps-coords { font-size:1.15rem; font-weight:700; letter-spacing:.04em; overflow-wrap:anywhere; color:var(--gold2); }
+  .map-link { display:inline-block; margin-top:14px; color:var(--gold2); }
+  footer { text-align:center; color:#7f8999; font-size:.75rem; margin:20px 0 0; }
+  #confetti { position:fixed; inset:0; width:100%; height:100%; pointer-events:none; z-index:10; }
+  @media(max-width:520px) {
+    .answer-row { flex-direction:column; }
+    .answer-row button { width:100%; }
+    .topline { align-items:flex-start; flex-direction:column; }
+  }
+  @media(prefers-reduced-motion:reduce) { *,*::before,*::after { scroll-behavior:auto !important; animation:none !important; transition:none !important; } }
+</style>
+</head>
+<body>
+<canvas id="confetti" aria-hidden="true"></canvas>
+<main class="wrap">
+  <header>
+    <div class="eyebrow">UMA EXPERIÊNCIA ESPECIAL</div>
+    <h1>O Grande Jogo da Sorte</h1>
+    <p class="subtitle">Perguntinha a perguntinha,... e um grande prémio no final poderás ganhar.</p>
+  </header>
+
+  <section class="game-card" id="game">
+    <div class="topline">
+      <div class="level" id="levelLabel">NÍVEL 01 / 06</div>
+    </div>
+    <div class="progress" id="progress" aria-label="Progresso do jogo">
+      <span></span><span></span><span></span><span></span><span></span><span></span>
+    </div>
+    <div class="question-label">A tua próxima missão:</div>
+    <h2 id="question">A carregar a primeira pergunta...</h2>
+    <form id="answerForm">
+      <div class="answer-row">
+        <input id="answerInput" type="text" autocomplete="off" placeholder="Escreve a tua resposta..." aria-label="A tua resposta" required>
+        <button type="submit">ACERTEI?</button>
+      </div>
+    </form>
+    <p class="feedback" id="feedback" aria-live="polite"></p>
+    <div class="hint" id="hint">Só a resposta certa, te vai permitir avançar. Boa sorte!</div>
+  </section>
+
+  <section class="game-card success hidden" id="finalScreen">
+    <div class="trophy">✦</div>
+    <div class="eyebrow">MISSÃO CONCLUÍDA</div>
+    <h2>O grande prémio é teu!</h2>
+   <p>Conseguiste chegar ao fim. Já sabes qual é a surpresa?</p>
+    <p><strong>Esta a ser preparado especialmente para ti, mas ainda que envolto em mistério.</strong></p>
+    <div class="count-panel">
+      <div class="count-number" id="daysLeft">--</div>
+      <div class="count-caption">DIAS ATÉ À REVELAÇÃO</div>
+      <p class="count-detail" id="countDetail">Na noite de 24 de dezembro, será revelado o local onde poderás encontrar o teu prémio.</p>
+    </div>
+    <div id="gpsBox" class="gps-box hidden">
+      <div class="question-label">O destino espera por ti aqui</div>
+      <p class="gps-coords" id="gpsCoordinates"></p>
+      <a class="map-link" id="mapLink" href="#" target="_blank" rel="noopener">MOSTRAR NO MAPA</a>
+    </div>
+    <p class="hint">Até lá, podes tentar adivinhar. Mas algumas surpresas são melhores quando ficam em segredo.</p>
+  </section>
+  <footer>Uma surpresa pensada especialmente só para ti</footer>
+</main>
+
+<script>
+/* =========================================================
+   PERSONALIZAÇÃO DO JOGO
+   1) Altera as perguntas e respostas dentro de "questions".
+   2) Mantém a resposta certa em "answers".
+   3) Podes indicar várias respostas aceites, se necessário.
+   ========================================================= */
+
+const CONFIG = {
+  // Momento em que as coordenadas serão reveladas.
+  // 20:00 de Lisboa em 24/12/2026 (Portugal continental está em UTC nessa data).
+  revealDate: "2026-12-24T20:00:00+00:00",
+
+  // SUBSTITUI pelos valores reais antes de publicares o site.
+  gpsCoordinates: "41.11525525738545, -8.628557681014332",
+
+  questions: [
+    {
+      question: "Vamos começar pelo mais importante:<br>Para quem foi preparada esta surpresa especial?",
+      answers: ["Sónia", "Sonia", "1"],
+      hint: "É alguém muito especial para quem preparou este jogo."
+    },
+    {
+      question: "Tenho uma agulha, mas não sei coser,<br>Não tenho olhos, mas ajudo-te a ver.<br>Aponto o caminho sem nunca falar,<br>E procuro sempre o norte para te guiar.<br><br>O que sou?",
+      answers: ["bússola", "a bússola", "1"],
+      hint: "Pensa num instrumento de orientação."
+    },
+    {
+      question: "Levo-te longe, mas nunca dou um passo,<br>Tenho linhas pintadas a marcar o traço.<br>Aguento o peso de quem passa por mim,<br>E ligo o início ao teu destino no fim.<br><br>O que sou?",
+      answers: ["estrada", "uma estrada", "a estrada", "1"],
+      hint: "É por lá que as viagens começam."
+    },
+    {
+      question: "Sou arredondado, mas não sou uma roda,<br>Sem tocar no chão, decido a rota.<br>Sem mim não há curva nem direção,<br>Viajo sempre agarrado à tua mão.<br><br>O que sou?",
+      answers: ["volante", "o volante", "1"],
+      hint: "É uma peça que encontramos no interior de muitos veículos."
+    },
+    {
+      question: "Sigo as tuas ordens sem vontade própria,<br>Abro os meus olhos quando a noite cai.<br>Deslizo sem pés pelo chão afora,<br>Mas sem ti no comando, daqui ninguém sai.<br><br>O que sou?",
+      answers: ["carro", "um carro", "automóvel", "automovel", "um automóvel", "um automovel", "1"],
+      hint: "Agora já estás muito perto de descobrir a natureza do grande prémio."
+    },
+  ]
+};
+
+/* =========================================================
+   SISTEMA DE ÁUDIO
+   ========================================================= */
+const successSound = new Audio("aplausos.mp3");
+successSound.preload = "auto";
+successSound.volume = 0.85;
+function playSuccessSound() {
+  successSound.pause();
+  successSound.currentTime = 0;
+  const playback = successSound.play();
+  if (playback !== undefined) {
+    playback.catch(error => {
+      console.error("Não foi possível reproduzir os aplausos:", error);
+    });
+  }
+}
+
+const wrongSound = new Audio("Errado.mp3");
+wrongSound.preload = "auto";
+wrongSound.volume = 0.85;
+function playWrongSound() {
+  wrongSound.pause();
+  wrongSound.currentTime = 0;
+  const playback = wrongSound.play();
+  if (playback !== undefined) {
+    playback.catch(error => {
+      console.error("Não foi possível reproduzir o som de erro:", error);
+    });
+  }
+}
+
+
+/* =========================================================
+   MOTOR DO JOGO — não é necessário editar para mudar perguntas.
+   ========================================================= */
+const $ = (id) => document.getElementById(id);
+let currentQuestion = 0;
+let respostaBloqueada = false;
+
+function normalize(value) {
+  return value.trim().toLocaleLowerCase("pt-PT")
+    .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+    .replace(/[.,!?;:]/g, "").replace(/\s+/g, " ");
+}
+
+function renderQuestion() {
+  const item = CONFIG.questions[currentQuestion];
+  $("levelLabel").textContent = `NÍVEL ${String(currentQuestion + 1).padStart(2,"0")} / ${String(CONFIG.questions.length).padStart(2,"0")}`;
+  $("question").innerHTML = item.question;
+  $("hint").textContent = currentQuestion === 0
+    ? "Só uma resposta certa te permite avançar. Boa sorte!"
+    : "Pista: " + item.hint;
+  $("feedback").textContent = "";
+  $("feedback").className = "feedback";
+  $("answerInput").value = "";
+  $("answerInput").focus();
+  [...$("progress").children].forEach((bar, index) => bar.classList.toggle("done", index < currentQuestion));
+}
+
+$("answerForm").addEventListener("submit", (event) => {
+  event.preventDefault();
+  // Impede novas respostas enquanto aguarda pela próxima pergunta
+  if (respostaBloqueada) return;
+  const answer = normalize($("answerInput").value);
+  if (!answer) return;
+  const accepted = CONFIG.questions[currentQuestion].answers.map(normalize);
+  if (accepted.includes(answer)) {
+    // Bloqueia imediatamente novas submissões
+    respostaBloqueada = true;
+    $("answerInput").disabled = true;
+    $("answerForm").querySelector("button").disabled = true;
+    $("feedback").textContent = "Parabéns, acertaste!! Desbloqueaste o próximo nível...";
+    $("feedback").className = "feedback";
+    [...$("progress").children].forEach((bar, index) =>
+      bar.classList.toggle("done", index <= currentQuestion)
+    );
+    launchConfetti();
+    window.setTimeout(() => {
+      currentQuestion++;
+      if (currentQuestion < CONFIG.questions.length) {
+        renderQuestion();
+      } else {
+        $("game").classList.add("hidden");
+        $("finalScreen").classList.remove("hidden");
+        startCountdown();
+      }
+      // Liberta o formulário para a próxima pergunta
+      respostaBloqueada = false;
+      $("answerInput").disabled = false;
+      $("answerForm").querySelector("button").disabled = false;
+    }, 1000);
+  } else {
+    $("feedback").textContent = "Não seja molengão, joga com o coração. Só avanças se deres a resposta certa...";
+    $("feedback").className = "feedback error";
+    $("answerInput").select();
+    playWrongSound();
+  }
+});
+
+/* Contagem decrescente e desbloqueio automático das coordenadas. */
+function startCountdown() {
+  // Primeira revelação: 24 de dezembro de 2026 às 20:00
+  const firstTarget = new Date("2026-12-24T20:00:00+00:00").getTime();
+  // Segunda revelação: 22 de fevereiro de 2027 às 00:00
+  const secondTarget = new Date("2027-02-22T00:00:00+00:00").getTime();
+  function update() {
+    const now = Date.now();
+    // ==========================================
+    // FASE 1 - ANTES DE 24 DE DEZEMBRO ÀS 20:00
+    // ==========================================
+    if (now < firstTarget) {
+      const distance = firstTarget - now;
+      const days = Math.floor(distance / 86400000);
+      const hours = Math.floor((distance % 86400000) / 3600000);
+      $("daysLeft").textContent = days;
+      $("countDetail").textContent =
+        `Faltam ${days} dias e ${hours} horas. Nessa noite, novas revelações acerca do teu prémio vão surgir.`;
+      $("gpsBox").classList.add("hidden");
+    }
+    // ==========================================
+    // FASE 2 - A PARTIR DE 24 DE DEZEMBRO ÀS 20:00
+    // ==========================================
+    else if (now < secondTarget) {
+      const distance = secondTarget - now;
+      const days = Math.floor(distance / 86400000);
+      const hours = Math.floor((distance % 86400000) / 3600000);
+      $("daysLeft").textContent = days;
+      $("countDetail").textContent =
+        `Faltam ${days} dias e ${hours} horas para poderes reclamar o teu prémio!`;
+      // Desbloqueia as coordenadas GPS
+      $("gpsBox").classList.remove("hidden");
+      $("gpsCoordinates").textContent = CONFIG.gpsCoordinates;
+      const parts = CONFIG.gpsCoordinates.split(",").map(v => v.trim());
+      if (parts.length === 2 && !/X/i.test(CONFIG.gpsCoordinates)) {
+        $("mapLink").href =
+          "https://www.google.com/maps?q=" + encodeURIComponent(parts.join(","));
+        $("mapLink").classList.remove("hidden");
+      } else {
+        $("mapLink").classList.add("hidden");
+        $("gpsCoordinates").textContent =
+          "O teu destino será anunciado em breve. Sê paciente...";
+      }
+    }
+    // ==========================================
+    // FASE 3 - A PARTIR DE 22 DE FEVEREIRO
+    // ==========================================
+    else {
+      $("daysLeft").textContent = "0";
+      $("countDetail").textContent =
+        "Finalmente, podes reclamar o teu prémio";
+      $("gpsBox").classList.remove("hidden");
+      $("gpsCoordinates").textContent = CONFIG.gpsCoordinates;
+      const parts = CONFIG.gpsCoordinates.split(",").map(v => v.trim());
+      if (parts.length === 2 && !/X/i.test(CONFIG.gpsCoordinates)) {
+        $("mapLink").href =
+          "https://www.google.com/maps?q=" + encodeURIComponent(parts.join(","));
+        $("mapLink").classList.remove("hidden");
+      } else {
+        $("mapLink").classList.add("hidden");
+        $("gpsCoordinates").textContent =
+          "O teu destino será anunciado em breve.";
+      }
+    }
+  }
+  update();
+  window.setInterval(update, 60000);
+}
+
+/* Pequena explosão de confettis em cada resposta certa. */
+const canvas = $("confetti");
+const ctx = canvas.getContext("2d");
+let particles = [];
+let animationFrame = null;
+
+function resizeCanvas() {
+  const ratio = Math.min(window.devicePixelRatio || 1, 2);
+  canvas.width = Math.floor(window.innerWidth * ratio);
+  canvas.height = Math.floor(window.innerHeight * ratio);
+  ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
+}
+window.addEventListener("resize", resizeCanvas);
+resizeCanvas();
+
+function launchConfetti() {
+  if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  playSuccessSound();
+  const width = window.innerWidth;
+  const height = window.innerHeight;
+  for (let i = 0; i < 800; i++) {
+    particles.push({
+      x: width * (0.25 + Math.random() * 0.5),
+      y: height * 0.34,
+      vx: (Math.random() - 0.5) * 9,
+      vy: -Math.random() * 9 - 2,
+      gravity: 0.18 + Math.random() * 0.12,
+      size: 3 + Math.random() * 5,
+      life: 85 + Math.random() * 35,
+      rotation: Math.random() * 6,
+      spin: (Math.random() - 0.5) * 0.2,
+      color: ["#e9bd62","#ffdf91","#ffffff","#9fb6d4","#72d6a0"][Math.floor(Math.random()*5)]
+    });
+  }
+  if (!animationFrame) {
+    animateConfetti(); 
+  }
+    
+}
+
+function animateConfetti() {
+  ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
+  particles = particles.filter(p => p.life > 0);
+  for (const p of particles) {
+    p.x += p.vx; p.y += p.vy; p.vy += p.gravity; p.rotation += p.spin; p.life--;
+    ctx.save();
+    ctx.translate(p.x, p.y);
+    ctx.rotate(p.rotation);
+    ctx.fillStyle = p.color;
+    ctx.fillRect(-p.size/2, -p.size/2, p.size, p.size * 1.6);
+    ctx.restore();
+  }
+  if (particles.length) animationFrame = requestAnimationFrame(animateConfetti);
+  else {
+    cancelAnimationFrame(animationFrame);
+    animationFrame = null;
+    ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
+  }
+}
+
+
+renderQuestion();
+</script>
+</body>
+</html>
