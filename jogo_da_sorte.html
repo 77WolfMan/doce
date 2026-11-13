@@ -302,41 +302,17 @@ async function playFireworkSound() {
 
 /* Ativação manual do som */
 $("activateSoundButton").addEventListener("click", async function() {
-    console.log("Botão de ativação pressionado.");
-    console.log("Fase pretendida:", somFasePretendida);
     try {
-        // Parar o som da outra fase
-        waitSound.pause();
-        waitSound.currentTime = 0;
-        fireworkSound.pause();
-        fireworkSound.currentTime = 0;
-        // Escolher o áudio
-        let audio;
-
+        stopPhaseSounds();
         if (somFasePretendida === 2) {
-            audio = waitSound;
+            await waitSound.play();
         }
         else if (somFasePretendida === 3) {
-            audio = fireworkSound;
+            await fireworkSound.play();
         }
-        else {
-            throw new Error("Fase de áudio não identificada: " + somFasePretendida);
-        }
-        console.log("Ficheiro:", audio.src);
-        console.log("Estado do áudio:", audio.readyState);
-        // Forçar carregamento
-        audio.load();
-        // Tentar reproduzir
-        await audio.play();
-        console.log("Áudio iniciado com sucesso!");
         this.classList.add("hidden");
     } catch (erro) {
-        console.error("FALHA NA ATIVAÇÃO DO SOM:", erro);
-        alert(
-            "Não foi possível ativar o som.\n\n" +
-            "Erro: " + erro.name + "\n" +
-            "Descrição: " + erro.message
-        );
+        console.error("Erro na reprodução do áudio:", erro);
         this.classList.remove("hidden");
     }
 });
