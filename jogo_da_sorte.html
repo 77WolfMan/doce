@@ -283,17 +283,17 @@ async function playWaitSound() {
 
 /* Som da Fase 3 */
 async function playFireworkSound() {
-    // Interromper completamente o som da Fase 2
+    // Se já estiver a tocar, não fazer absolutamente nada
+    if (!fireworkSound.paused) return;
+    // Interromper o som da Fase 2
     waitSound.pause();
     waitSound.currentTime = 0;
-    // Preparar o som da Fase 3
-    fireworkSound.pause();
+    // Iniciar o som da Fase 3
     fireworkSound.currentTime = 0;
     try {
         await fireworkSound.play();
-
         $("activateSoundButton").classList.add("hidden");
-
+        console.log("Som da Fase 3 iniciado com sucesso.");
     } catch (error) {
         console.error("Erro no som da Fase 3:", error);
         $("activateSoundButton").classList.remove("hidden");
