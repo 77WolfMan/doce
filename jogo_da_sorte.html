@@ -239,13 +239,15 @@ const $ = (id) => document.getElementById(id);
    ========================================================= */
 const successSound = new Audio("Aplausos.mp3");
 const wrongSound = new Audio("Errado.mp3");
+const QuaseSound = new Audio("Quase.mp3");
 const waitSound = new Audio("Espera.mp3");
 const fireworkSound = new Audio("Foguetes.mp3");
 let somFasePretendida = 0;
-[successSound, wrongSound, waitSound, fireworkSound].forEach(audio => {
+[successSound, wrongSound, QuaseSound, waitSound, fireworkSound].forEach(audio => {
     audio.preload = "auto";
     audio.volume = 0.85;
 });
+QuaseSound.loop = true;
 waitSound.loop = true;
 fireworkSound.loop = true;
 function playSuccessSound() {
@@ -260,10 +262,28 @@ function playWrongSound() {
 
 /* Parar sons das fases */
 function stopPhaseSounds() {
-    [waitSound, fireworkSound].forEach(audio => {
+    [QuaseSound, waitSound, fireworkSound].forEach(audio => {
         audio.pause();
         audio.currentTime = 0;
     });
+}
+
+/* Som da Fase 1 */
+async function playQuaseSound() {
+    if (!QuaseSound.paused) return;
+    waitSound.pause();
+    waitSound.currentTime = 0;
+    fireworkSound.pause();
+    fireworkSound.currentTime = 0;
+    QuaseSound.currentTime = 0;
+    try {
+        await QuaseSound.play();
+        $("activateSoundButton").classList.add("hidden");
+        console.log("Som da Fase 1 iniciado.");
+    } catch (error) {
+        console.warn("Erro no som da Fase 1:", error);
+        $("activateSoundButton").classList.remove("hidden");
+    }
 }
 
 /* Som da Fase 2 */
@@ -304,7 +324,10 @@ async function playFireworkSound() {
 $("activateSoundButton").addEventListener("click", async function() {
     try {
         stopPhaseSounds();
-        if (somFasePretendida === 2) {
+        if (somFasePretendida === 1) {
+            await QuaseSound.play();
+        }
+        else if (somFasePretendida === 2) {
             await waitSound.play();
         }
         else if (somFasePretendida === 3) {
@@ -463,7 +486,13 @@ function startCountdown() {
     // FASE 1 - ANTES DE 24 DE DEZEMBRO ÀS 20:00
     // ==========================================
     if (now < firstTarget) {
-      stopPhaseSounds();
+      // Som contínuo da Fase 1
+      somFasePretendida = 1;
+      waitSound.pause();
+      waitSound.currentTime = 0;
+      fireworkSound.pause();
+      fireworkSound.currentTime = 0;
+      playQuaseSound();
       $("activateSoundButton").classList.add("hidden");
       const distance = firstTarget - now;
       const days = Math.floor(distance / 86400000);
