@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#10131b">
+<title>O Grande Jogo da Sorte</title>
+<style>
+  :root {
+    --bg:#10131b; --panel:#191f2b; --panel2:#202838; --gold:#e9bd62;
+    --gold2:#ffdf91; --text:#f5f2ea; --muted:#aeb6c5; --line:#343d4d;
+    --good:#72d6a0; --bad:#ff8585;
+  }
+  * { box-sizing:border-box; }
+  body { margin:0; min-height:100vh; color:var(--text);
+    background:
+        linear-gradient(rgba(16,19,27,0.85), rgba(16,19,27,0.65)),
+        url("Fundo.jpg") center center / cover no-repeat fixed;
+
+    font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+    display:flex;
+    justify-content:center;
+    padding:28px 16px 50px;}
+    
+  .wrap { width:min(800px,100%); }
+  header { text-align:center; margin:8px 0 24px; }
+  .eyebrow { color:var(--gold); letter-spacing:.24em; font-size:.72rem; font-weight:700; }
+  h1 { margin:9px 0 7px; font-family:Georgia,serif; font-size:clamp(2rem,7vw,3.35rem); font-weight:500; letter-spacing:.02em; }
+  h2 { font-family:Georgia,serif; font-weight:500; font-size:clamp(1.45rem,4vw,2rem); line-height:1.35; margin:12px 0 22px; }
+  .game-card {
+    background:linear-gradient(145deg,rgba(32,40,56,.97),rgba(22,28,39,.98));
+    border:1px solid rgba(233,189,98,.38); border-radius:22px;
+    padding:clamp(20px,5vw,38px); box-shadow:0 24px 70px #0007;
+  }
+  .topline { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:20px; }
+ 
+</style>
+</head>
+<body>
+<main class="wrap">
+  <header>
+    <div class="eyebrow">UMA EXPERIÊNCIA ESPECIAL</div>
+    <h1>O Grande Jogo da Sorte</h1>
+  </header>
+  <section class="game-card">
+    <h2>Querias um prémio? Olha, também eu queria ir de férias para as Maldivas e cá estamos nós ...<br><br></h2>
+    <div class="eyebrow">NÃO DESANIMES...</div>
+  </section>
+</main>
+</body>
+</html>
