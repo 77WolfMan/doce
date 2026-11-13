@@ -210,11 +210,8 @@ async function resetJogo() {
     try {
         const resposta = await fetch(CONFIG_GITHUB.api, {
             method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "X-Action": "RESET"
-            },
-            body: JSON.stringify({})
+            headers: {"Content-Type": "application/json"},
+			body: JSON.stringify({action: "RESET"})
         });
         const resultado = await resposta.json();
         if (!resposta.ok || !resultado.success) {
