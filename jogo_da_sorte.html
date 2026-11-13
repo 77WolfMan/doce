@@ -21,7 +21,7 @@
     display:flex;
     justify-content:center;
     padding:28px 16px 50px;}
-
+    
   .wrap { width:min(850px,100%); }
   header { text-align:center; margin:8px 0 24px; }
   .eyebrow { color:var(--gold); letter-spacing:.24em; font-size:.72rem; font-weight:700; }
@@ -104,7 +104,7 @@
     </p>
     <button type="button" id="startButton">COMEÇAR A JOGAR</button>
   </section>
-
+  
   <section class="game-card hidden" id="game">
     <div class="topline">
       <div class="level" id="levelLabel">NÍVEL 01 / 06</div>
@@ -234,21 +234,20 @@ async function resetJogo() {
 }
 
 const $ = (id) => document.getElementById(id);
-
-
 /* =========================================================
    SISTEMA DE ÁUDIO
    ========================================================= */
-
-/* Sons pontuais: mantêm o sistema HTMLAudio original */
 const successSound = new Audio("Aplausos.mp3");
 const wrongSound = new Audio("Errado.mp3");
-
-[successSound, wrongSound].forEach(audio => {
+const waitSound = new Audio("Espera.mp3");
+const fireworkSound = new Audio("Firework.mp3");
+let somFasePretendida = 0;
+[successSound, wrongSound, waitSound, fireworkSound].forEach(audio => {
     audio.preload = "auto";
     audio.volume = 0.85;
 });
-
+waitSound.loop = true;
+fireworkSound.loop = true;
 function playSuccessSound() {
     successSound.currentTime = 0;
     successSound.play().catch(() => {});
@@ -259,359 +258,61 @@ function playWrongSound() {
     wrongSound.play().catch(() => {});
 }
 
-
-/* =========================================================
-   WEB AUDIO API — SONS CONTÍNUOS DAS FASES
-   ========================================================= */
-
-/* Criar o contexto de áudio */
-const AudioContextClass = window.AudioContext || window.webkitAudioContext;
-
-const audioContext = AudioContextClass
-    ? new AudioContextClass()
-    : null;
-
-let waitBuffer = null;
-let fireworkBuffer = null;
-
-let waitSource = null;
-let fireworkSource = null;
-
-let somFasePretendida = 0;
-
-let audioPreparado = false;
-let audioLoadPromise = null;
-
-let activePhase = 0;
-
-/* Elementos para manter o contexto de áudio activo */
-let keepAliveOscillator = null;
-let keepAliveGain = null;
-
-
-/* Desbloquear o áudio durante uma interação do utilizador */
-function desbloquearAudio() {
-
-    if (!audioContext) {
-        console.error("Este navegador não suporta Web Audio API.");
-        return;
-    }
-
-    if (audioContext.state !== "running") {
-        audioContext.resume().catch(error => {
-            console.warn("Não foi possível desbloquear o áudio:", error);
-        });
-    }
-
-    /* Oscilador silencioso para manter o contexto activo */
-    if (!keepAliveOscillator) {
-
-        keepAliveOscillator = audioContext.createOscillator();
-        keepAliveGain = audioContext.createGain();
-
-        keepAliveGain.gain.value = 0;
-
-        keepAliveOscillator.connect(keepAliveGain);
-        keepAliveGain.connect(audioContext.destination);
-
-        keepAliveOscillator.start();
-    }
-}
-
-
-/* Carregar antecipadamente os ficheiros de áudio */
-async function prepararAudio() {
-
-    if (audioPreparado) {
-        return true;
-    }
-
-    if (audioLoadPromise) {
-        return audioLoadPromise;
-    }
-
-    audioLoadPromise = (async function() {
-
-        try {
-
-            console.log("A carregar os ficheiros de áudio...");
-
-            const [esperaResponse, fireworkResponse] = await Promise.all([
-                fetch("Espera.mp3"),
-                fetch("Firework.mp3")
-            ]);
-
-            if (!esperaResponse.ok) {
-                throw new Error("Não foi possível carregar Espera.mp3.");
-            }
-
-            if (!fireworkResponse.ok) {
-                throw new Error("Não foi possível carregar Firework.mp3.");
-            }
-
-            const [esperaData, fireworkData] = await Promise.all([
-                esperaResponse.arrayBuffer(),
-                fireworkResponse.arrayBuffer()
-            ]);
-
-            [waitBuffer, fireworkBuffer] = await Promise.all([
-                audioContext.decodeAudioData(esperaData),
-                audioContext.decodeAudioData(fireworkData)
-            ]);
-
-            audioPreparado = true;
-
-            console.log("Os dois ficheiros de áudio foram carregados correctamente.");
-
-            return true;
-
-        } catch (erro) {
-
-            console.error("Erro ao preparar os áudios:", erro);
-
-            audioLoadPromise = null;
-
-            return false;
-
-        }
-
-    })();
-
-    return audioLoadPromise;
-}
-
-
-/* Parar os sons das fases */
+/* Parar sons das fases */
 function stopPhaseSounds() {
-
-    activePhase = 0;
-
-    if (waitSource) {
-
-        waitSource.onended = null;
-
-        try {
-            waitSource.stop();
-        } catch(e) {}
-
-        waitSource.disconnect();
-        waitSource = null;
-    }
-
-    if (fireworkSource) {
-
-        fireworkSource.onended = null;
-
-        try {
-            fireworkSource.stop();
-        } catch(e) {}
-
-        fireworkSource.disconnect();
-        fireworkSource = null;
-    }
-
+    [waitSound, fireworkSound].forEach(audio => {
+        audio.pause();
+        audio.currentTime = 0;
+    });
 }
-
-
-/* =========================================================
-   REPRODUÇÃO CONTÍNUA DOS SONS
-   ========================================================= */
-
-async function playPhaseSound(fase) {
-
-    if (!audioContext) {
-        console.error("Web Audio API não disponível.");
-        return;
-    }
-
-    /* Se o som desta fase já estiver a tocar, não o reiniciar */
-    if (
-        activePhase === fase &&
-        ((fase === 2 && waitSource) || (fase === 3 && fireworkSource))
-    ) {
-
-        if (audioContext.state !== "running") {
-
-            try {
-                await audioContext.resume();
-            } catch(erro) {
-                console.error("Não foi possível retomar o áudio:", erro);
-                $("activateSoundButton").classList.remove("hidden");
-                return;
-            }
-
-        }
-
-        if (audioContext.state === "running") {
-            $("activateSoundButton").classList.add("hidden");
-        }
-
-        return;
-    }
-
-
-    /* Verificar se os ficheiros estão carregados */
-    if (!audioPreparado) {
-
-        console.warn("Os ficheiros de áudio ainda não estão preparados.");
-
-        $("activateSoundButton").classList.remove("hidden");
-
-        return;
-    }
-
-
-    /* Garantir que o contexto está activo */
-    if (audioContext.state !== "running") {
-
-        try {
-
-            await audioContext.resume();
-
-        } catch(erro) {
-
-            console.error("Não foi possível activar o áudio:", erro);
-
-            $("activateSoundButton").classList.remove("hidden");
-
-            return;
-        }
-
-    }
-
-    if (audioContext.state !== "running") {
-
-        $("activateSoundButton").classList.remove("hidden");
-
-        return;
-    }
-
-
-    /* Interromper o som da fase anterior */
-    stopPhaseSounds();
-
-
-    /* Seleccionar o ficheiro correspondente */
-    let buffer;
-
-    if (fase === 2) {
-
-        buffer = waitBuffer;
-
-    } else if (fase === 3) {
-
-        buffer = fireworkBuffer;
-
-    } else {
-
-        return;
-    }
-
-
-    /* Criar nova fonte de áudio */
-    const source = audioContext.createBufferSource();
-
-    source.buffer = buffer;
-
-    /* Reprodução contínua */
-    source.loop = true;
-
-    source.connect(audioContext.destination);
-
-
-    /* Guardar a referência da fonte */
-    if (fase === 2) {
-
-        waitSource = source;
-
-    } else {
-
-        fireworkSource = source;
-
-    }
-
-    activePhase = fase;
-
-
-    /* Detectar eventual interrupção */
-    source.onended = function() {
-
-        if (fase === 2 && waitSource === source) {
-            waitSource = null;
-            activePhase = 0;
-        }
-
-        if (fase === 3 && fireworkSource === source) {
-            fireworkSource = null;
-            activePhase = 0;
-        }
-
-    };
-
-
-    /* Iniciar reprodução */
-    source.start(0);
-
-    $("activateSoundButton").classList.add("hidden");
-
-    console.log("Som contínuo da Fase " + fase + " iniciado.");
-
-}
-
 
 /* Som da Fase 2 */
 function playWaitSound() {
-    playPhaseSound(2);
+    if (!waitSound.paused) return;
+    fireworkSound.pause();
+    fireworkSound.currentTime = 0;
+    waitSound.currentTime = 0;
+    waitSound.play()
+        .then(() => {
+            $("activateSoundButton").classList.add("hidden");
+        })
+        .catch(error => {
+            console.warn("Reprodução automática da Fase 2 bloqueada:", error);
+            $("activateSoundButton").classList.remove("hidden");
+        });
 }
-
 
 /* Som da Fase 3 */
 function playFireworkSound() {
-    playPhaseSound(3);
+    if (!fireworkSound.paused) return;
+    waitSound.pause();
+    waitSound.currentTime = 0;
+    fireworkSound.currentTime = 0;
+    fireworkSound.play()
+        .then(() => {
+            $("activateSoundButton").classList.add("hidden");
+        })
+        .catch(error => {
+            console.warn("Reprodução automática da Fase 3 bloqueada:", error);
+            $("activateSoundButton").classList.remove("hidden");
+        });
 }
 
-
-/* =========================================================
-   ATIVAÇÃO MANUAL DO SOM
-   Salvaguarda para navegadores que suspendam o áudio.
-   ========================================================= */
-
+/* Ativação manual do som */
 $("activateSoundButton").addEventListener("click", async function() {
-
     try {
-
-        desbloquearAudio();
-
-        await audioContext.resume();
-
-        const carregado = await prepararAudio();
-
-        if (!carregado) {
-            throw new Error("Não foi possível carregar os ficheiros de áudio.");
-        }
-
+        stopPhaseSounds();
         if (somFasePretendida === 2) {
-
-            await playPhaseSound(2);
-
-        } else if (somFasePretendida === 3) {
-
-            await playPhaseSound(3);
-
+            await waitSound.play();
         }
-
-        if (audioContext.state === "running") {
-            this.classList.add("hidden");
+        else if (somFasePretendida === 3) {
+            await fireworkSound.play();
         }
-
+        this.classList.add("hidden");
     } catch (erro) {
-
         console.error("Erro na reprodução do áudio:", erro);
-
         this.classList.remove("hidden");
-
     }
-
 });
 
 
@@ -619,54 +320,39 @@ $("activateSoundButton").addEventListener("click", async function() {
    SISTEMA DE MEMORIZAÇÃO E SINCRONIZAÇÃO
    CLOUDFLARE WORKER + GITHUB
    ========================================================= */
-
 const CONFIG_GITHUB = {
     api: "https://grande-jogo-api.lobo-paulo.workers.dev"
 };
-
 const STORAGE_KEY = "grandeJogoDaSorte_progresso";
-
 
 /* =========================================================
    LER PROGRESSO
    ========================================================= */
-
 async function lerProgresso() {
-
     const resposta = await fetch(CONFIG_GITHUB.api, {
         method: "GET",
         cache: "no-store"
     });
-
     if (!resposta.ok) {
         throw new Error("Não foi possível recuperar o progresso.");
     }
-
     const progresso = await resposta.json();
-
     return progresso;
 }
-
 
 /* =========================================================
    GUARDAR PROGRESSO
    ========================================================= */
-
 async function guardarProgresso() {
-
     const dados = {
         pergunta_atual: currentQuestion,
-
         perguntas_utilizadas: Array.from(
             { length: currentQuestion },
             (_, index) => index
         ),
-
         jogo_concluido: currentQuestion >= CONFIG.questions.length,
-
         ultima_atualizacao: new Date().toISOString()
     };
-
     const resposta = await fetch(CONFIG_GITHUB.api, {
         method: "POST",
         headers: {
@@ -674,476 +360,258 @@ async function guardarProgresso() {
         },
         body: JSON.stringify(dados)
     });
-
     const resultado = await resposta.json();
-
     if (!resposta.ok || !resultado.success) {
         throw new Error(
             resultado.error || "Não foi possível guardar o progresso."
         );
     }
-
     return true;
 }
-
 
 /* =========================================================
    MOTOR DO JOGO — não é necessário editar para mudar perguntas.
    ========================================================= */
-
 let currentQuestion = 0;
 let respostaBloqueada = false;
 
 function normalize(value) {
-
   return value.trim().toLocaleLowerCase("pt-PT")
     .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
     .replace(/[.,!?;:]/g, "").replace(/\s+/g, " ");
-
 }
 
-
 function renderQuestion() {
-
   const item = CONFIG.questions[currentQuestion];
-
   $("levelLabel").textContent = `NÍVEL ${String(currentQuestion + 1).padStart(2,"0")} / ${String(CONFIG.questions.length).padStart(2,"0")}`;
-
   $("question").innerHTML = item.question;
-
   $("hint").textContent = currentQuestion === 0
     ? "Só uma resposta certa te permite avançar. Boa sorte!"
     : "Pista: " + item.hint;
-
   $("feedback").textContent = "";
-
   $("feedback").className = "feedback";
-
   $("answerInput").value = "";
-
   $("answerInput").focus();
-
   [...$("progress").children].forEach((bar, index) => bar.classList.toggle("done", index < currentQuestion));
-
 }
 
-
 $("answerForm").addEventListener("submit", (event) => {
-
   event.preventDefault();
-
   // Impede novas respostas enquanto aguarda pela próxima pergunta
   if (respostaBloqueada) return;
-
   const answer = normalize($("answerInput").value);
-
   if (!answer) return;
-
   const accepted = CONFIG.questions[currentQuestion].answers.map(normalize);
-
   if (accepted.includes(answer)) {
-
     // Bloqueia imediatamente novas submissões
     respostaBloqueada = true;
-
     $("answerInput").disabled = true;
-
     $("answerForm").querySelector("button").disabled = true;
-
     $("feedback").textContent = "Parabéns, acertaste!! Desbloqueaste o próximo nível...";
-
     $("feedback").className = "feedback";
-
     [...$("progress").children].forEach((bar, index) =>
       bar.classList.toggle("done", index <= currentQuestion)
     );
-
     launchConfetti();
-
-
-    window.setTimeout(async () => {
-
-        const perguntaAnterior = currentQuestion;
-
-        currentQuestion++;
-
-        try {
-
-            await guardarProgresso();
-
-        } catch (error) {
-
-            currentQuestion = perguntaAnterior;
-
-            console.error("Erro ao guardar progresso:", error);
-
-            $("feedback").textContent =
-                "Acertaste, mas não foi possível guardar o progresso. Verifica a ligação e tenta novamente.";
-
-            $("feedback").className = "feedback error";
-
-            respostaBloqueada = false;
-
-            $("answerInput").disabled = false;
-
-            $("answerForm").querySelector("button").disabled = false;
-
-            return;
-        }
-
-        if (currentQuestion < CONFIG.questions.length) {
-
-            renderQuestion();
-
-        } else {
-
-            $("game").classList.add("hidden");
-
-            $("finalScreen").classList.remove("hidden");
-
-            startCountdown();
-
-        }
-
+    
+window.setTimeout(async () => {
+    const perguntaAnterior = currentQuestion;
+    currentQuestion++;
+    try {
+        await guardarProgresso();
+    } catch (error) {
+        currentQuestion = perguntaAnterior;
+        console.error("Erro ao guardar progresso:", error);
+        $("feedback").textContent =
+            "Acertaste, mas não foi possível guardar o progresso. Verifica a ligação e tenta novamente.";
+        $("feedback").className = "feedback error";
         respostaBloqueada = false;
-
         $("answerInput").disabled = false;
-
         $("answerForm").querySelector("button").disabled = false;
-
-    }, 7000);
-
+        return;
+    }
+    if (currentQuestion < CONFIG.questions.length) {
+        renderQuestion();
+    } else {
+        $("game").classList.add("hidden");
+        $("finalScreen").classList.remove("hidden");
+        startCountdown();
+    }
+    respostaBloqueada = false;
+    $("answerInput").disabled = false;
+    $("answerForm").querySelector("button").disabled = false;
+}, 7000);
   } else {
-
     $("feedback").textContent = "Não seja molengão, joga com o coração. Só avanças se deres a resposta certa...";
-
     $("feedback").className = "feedback error";
-
     $("answerInput").select();
-
     playWrongSound();
-
   }
-
 });
 
-
-/* =========================================================
-   CONTAGEM DECRESCENTE E DESBLOQUEIO AUTOMÁTICO
-   DAS COORDENADAS.
-   ========================================================= */
-
+/* Contagem decrescente e desbloqueio automático das coordenadas. */
 function startCountdown() {
-
   // Primeira revelação: 24 de dezembro de 2026 às 20:00
   const firstTarget = new Date("2026-12-24T20:00:00+00:00").getTime();
-
   // Segunda revelação: 22 de fevereiro de 2027 às 00:00
   const secondTarget = new Date("2027-02-22T00:00:00+00:00").getTime();
-
-
   function update() {
-
     const now = Date.now();
-
-
     // ==========================================
     // FASE 1 - ANTES DE 24 DE DEZEMBRO ÀS 20:00
     // ==========================================
-
     if (now < firstTarget) {
-
       stopPhaseSounds();
-
       $("activateSoundButton").classList.add("hidden");
-
       const distance = firstTarget - now;
-
       const days = Math.floor(distance / 86400000);
-
       const hours = Math.floor((distance % 86400000) / 3600000);
-
       $("frasepremio").textContent = "O grande prémio esta a um passo!";
-
       $("msgpremio").textContent = "Conseguiste chegar até aqui. Já sabes qual é a surpresa?";
-
       $("msgpremiobold").textContent = "Esta a ser preparado com carinho para ti, mas envolto de muito mistério.";
-
       $("msgrevelacao").textContent = "DIAS ATÉ À PRÓXIMA REVELAÇÃO";
-
       $("msgdofinal").textContent = "Até lá, podes tentar adivinhar, pois algumas surpresas sabem melhores quando ficam em segredo.";
-
       $("daysLeft").textContent = days;
-
       $("countDetail").textContent =
         `Faltam ${days} dias e ${hours} horas. Nessa noite, novas revelações acerca do teu prémio vão surgir.`;
-
       $("gpsBox").classList.add("hidden");
-
     }
-
-
     // ==========================================
     // FASE 2 - A PARTIR DE 24 DE DEZEMBRO ÀS 20:00
     // ==========================================
-
     else if (now < secondTarget) {
-
       // Reproduzir som da Fase 2
       somFasePretendida = 2;
-
       playWaitSound();
-
       const distance = secondTarget - now;
-
       const days = Math.floor(distance / 86400000);
-
       const hours = Math.floor((distance % 86400000) / 3600000);
-
       $("frasepremio").textContent = "O grande prémio é teu!";
-
       $("msgpremio").textContent = "Conseguiste aguentar até aqui, e vais ter de ter um pouco mais de paciência.";
-
       $("msgpremiobold").textContent = "Ainda não esta pronto, mas não deves de desanimar. Toma lá mais esta pista.";
-
       $("msgrevelacao").textContent = "DIAS ATÉ À REVELAÇÃO FINAL";
-
       $("msgdofinal").innerHTML = "Quanto o tempo acabar, uma última pista de tou dar. Obstante, já sabes qual é a surpresa?";
-
       $("daysLeft").textContent = days;
-
       $("countDetail").textContent =
         `Faltam ${days} dias e ${hours} horas para poderes reclamar o teu prémio!`;
-
       // Desbloqueia as coordenadas GPS
       $("gpsBox").classList.remove("hidden");
-
       $("gpsCoordinates").textContent = CONFIG.gpsCoordinates;
-
       const parts = CONFIG.gpsCoordinates.split(",").map(v => v.trim());
-
       if (parts.length === 2 && !/X/i.test(CONFIG.gpsCoordinates)) {
-
         $("mapLink").href =
           "https://www.google.com/maps?q=" + encodeURIComponent(parts.join(","));
-
         $("mapLink").classList.remove("hidden");
-
       } else {
-
         $("mapLink").classList.add("hidden");
-
         $("gpsCoordinates").textContent =
           "O teu destino será anunciado em breve. Sê paciente...";
-
       }
-
     }
-
-
     // ==========================================
     // FASE 3 - A PARTIR DE 22 DE FEVEREIRO
     // ==========================================
-
     else {
-
-      // Reproduzir som da Fase 3
+      /// Reproduzir som da Fase 3
       somFasePretendida = 3;
-
-      playFireworkSound();
-
+	  playFireworkSound();
       $("daysLeft").textContent = "0";
-
       $("frasepremio").textContent = "Finalmente, o grande prémio é teu.";
-
       $("msgpremio").textContent = "A paciência é uma virtude e já o podes reclamar.";
-
       $("msgpremiobold").textContent = "";
-
       $("msgrevelacao").textContent = "DIAS ATÉ À REVELAÇÃO FINAL";
-
       $("msgdofinal").innerHTML = "Vim da Alemanha a acelerar, com os meus anéis a brilhar. <br>Não fui às Olimpíadas competir, e o meu nome significa ouvir. Quem sou?";
-
       $("countDetail").textContent =
         "Finalmente, podes reclamar o teu prémio";
-
       $("gpsBox").classList.remove("hidden");
-
       $("gpsCoordinates").textContent = CONFIG.gpsCoordinates;
-
       const parts = CONFIG.gpsCoordinates.split(",").map(v => v.trim());
-
       if (parts.length === 2 && !/X/i.test(CONFIG.gpsCoordinates)) {
-
         $("mapLink").href =
           "https://www.google.com/maps?q=" + encodeURIComponent(parts.join(","));
-
         $("mapLink").classList.remove("hidden");
-
       } else {
-
         $("mapLink").classList.add("hidden");
-
         $("gpsCoordinates").textContent =
           "O teu destino será anunciado em breve.";
-
       }
-
     }
-
   }
-
   update();
-
   window.setInterval(update, 60000);
-
 }
 
-
-/* =========================================================
-   PEQUENA EXPLOSÃO DE CONFETTIS EM CADA RESPOSTA CERTA.
-   ========================================================= */
-
+/* Pequena explosão de confettis em cada resposta certa. */
 const canvas = $("confetti");
-
 const ctx = canvas.getContext("2d");
-
 let particles = [];
-
 let animationFrame = null;
 
-
 function resizeCanvas() {
-
   const ratio = Math.min(window.devicePixelRatio || 1, 2);
-
   canvas.width = Math.floor(window.innerWidth * ratio);
-
   canvas.height = Math.floor(window.innerHeight * ratio);
-
   ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
-
 }
-
 window.addEventListener("resize", resizeCanvas);
-
 resizeCanvas();
 
-
 function launchConfetti() {
-
   playSuccessSound();
-
   if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-
   const width = window.innerWidth;
-
   const height = window.innerHeight;
-
   for (let i = 0; i < 800; i++) {
-
     particles.push({
-
       x: width * (0.25 + Math.random() * 0.5),
-
       y: height * 0.34,
-
       vx: (Math.random() - 0.5) * 9,
-
       vy: -Math.random() * 9 - 2,
-
       gravity: 0.18 + Math.random() * 0.12,
-
       size: 3 + Math.random() * 5,
-
       life: 85 + Math.random() * 35,
-
       rotation: Math.random() * 6,
-
       spin: (Math.random() - 0.5) * 0.2,
-
       color: ["#e9bd62","#ffdf91","#ffffff","#9fb6d4","#72d6a0"][Math.floor(Math.random()*5)]
-
     });
-
   }
-
   if (!animationFrame) {
-
-    animateConfetti();
-
+    animateConfetti(); 
   }
-
+    
 }
 
-
 function animateConfetti() {
-
   ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
-
   particles = particles.filter(p => p.life > 0);
-
   for (const p of particles) {
-
-    p.x += p.vx;
-
-    p.y += p.vy;
-
-    p.vy += p.gravity;
-
-    p.rotation += p.spin;
-
-    p.life--;
-
+    p.x += p.vx; p.y += p.vy; p.vy += p.gravity; p.rotation += p.spin; p.life--;
     ctx.save();
-
     ctx.translate(p.x, p.y);
-
     ctx.rotate(p.rotation);
-
     ctx.fillStyle = p.color;
-
     ctx.fillRect(-p.size/2, -p.size/2, p.size, p.size * 1.6);
-
     ctx.restore();
-
   }
-
-  if (particles.length) {
-
-    animationFrame = requestAnimationFrame(animateConfetti);
-
-  } else {
-
+  if (particles.length) animationFrame = requestAnimationFrame(animateConfetti);
+  else {
     cancelAnimationFrame(animationFrame);
-
     animationFrame = null;
-
     ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
-
   }
-
 }
 
 
 /* =========================================================
    INICIALIZAÇÃO DO JOGO
    ========================================================= */
-
 let jogoConcluido = false;
-
 let jogoIniciado = false;
-
-
 // Recupera o progresso sem mostrar ainda as perguntas.
 async function iniciarJogo() {
-
     $("startButton").disabled = true;
-
     try {
-
         const progresso = await lerProgresso();
-
         currentQuestion = Math.max(
             0,
             Math.min(
@@ -1151,97 +619,46 @@ async function iniciarJogo() {
                 CONFIG.questions.length
             )
         );
-
         jogoConcluido = currentQuestion >= CONFIG.questions.length;
-
         $("startButton").disabled = false;
-
     } catch (error) {
-
         console.error(error);
-
         $("startButton").disabled = false;
-
         $("feedback").textContent =
             "Não foi possível recuperar o progresso. Verifica a ligação à Internet e tenta novamente.";
-
         $("feedback").className = "feedback error";
-
     }
-
 }
-
-
 // Só começa quando carregar no botão.
 $("startButton").addEventListener("click", () => {
-
     if (jogoIniciado) return;
-
     jogoIniciado = true;
-
-
-    /* Desbloquear o sistema de áudio durante o clique */
-    desbloquearAudio();
-
-
-    /* Carregar antecipadamente os sons das fases */
-    prepararAudio();
-
-
     $("introScreen").classList.add("hidden");
-
     if (jogoConcluido) {
-
         $("finalScreen").classList.remove("hidden");
-
         startCountdown();
-
     } else {
-
         $("game").classList.remove("hidden");
-
         renderQuestion();
-
     }
-
 });
-
-
-/* =========================================================
-   RESET POR TRIPLO CLIQUE
-   ========================================================= */
-
+ 
 let numeroCliques = 0;
-
 let temporizadorCliques = null;
-
 $("resetLink").addEventListener("click", function() {
-
     numeroCliques++;
-
     clearTimeout(temporizadorCliques);
-
     if (numeroCliques === 3) {
-
         numeroCliques = 0;
-
         resetJogo();
-
     } else {
-
         temporizadorCliques = setTimeout(function() {
-
             numeroCliques = 0;
-
         }, 700);
-
     }
-
 });
-
 
 iniciarJogo();
-
 </script>
 </body>
 </html>
