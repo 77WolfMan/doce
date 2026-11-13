@@ -86,12 +86,31 @@
     <p class="subtitle">Perguntinha a perguntinha,... e um grande prémio no final poderás ganhar.</p>
   </header>
 
-  <section class="game-card" id="game">
+    <!-- ECRÃ DE APRESENTAÇÃO INICIAL -->
+  <section class="game-card" id="introScreen">
+    <div class="eyebrow">UMA SURPRESA ESTÁ À TUA ESPERA</div>
+    <h2>Há prémios que se ganham. E há surpresas que são preparadas com o coração.</h2>
+    <p class="intro-copy">
+      Hoje começa uma aventura especial. Pelo caminho vais encontrar perguntas,
+      enigmas e pequenas pistas. Cada resposta certa aproxima-te de um prémio
+      muito especial — mas nem tudo será revelado de imediato.
+    </p>
+    <p class="intro-copy">
+      Respira fundo, prepara a tua intuição e deixa-te levar pelo jogo.
+      Só precisas de uma coisa: chegar ao fim.
+    </p>
+    <p style="color:var(--gold2);font-weight:700;margin:22px 0">
+      Estás pronta para jogar?
+    </p>
+    <button type="button" id="startButton">COMEÇAR O JOGO</button>
+  </section>
+  
+  <section class="game-card hidden" id="game">
     <div class="topline">
       <div class="level" id="levelLabel">NÍVEL 01 / 06</div>
     </div>
     <div class="progress" id="progress" aria-label="Progresso do jogo">
-      <span></span><span></span><span></span><span></span><span></span><span></span>
+      <span></span><span></span><span></span><span></span><span></span><span></span><span></span>
     </div>
     <div class="question-label">A tua próxima missão:</div>
     <h2 id="question">A carregar a primeira pergunta...</h2>
@@ -166,7 +185,7 @@ const CONFIG = {
     },
     {
       question: "Não sou farol, mas ajudo a ver,<br>Tudo o que na estrada pode acontecer.<br>Olho nos espelhos e sigo cada sinal,<br>Se me deixares em casa, a viagem corre mal.<br><br>O que sou?",
-      answers: ["atenção", "a atenção", "a Atenção", "concentração", "a concentração", "1"],
+      answers: ["atenção", "a atenção", "a Atenção", "concentração", "a concentração", "atento", "1"],
       hint: "É o oposto da distração quando estamos a conduzir."
 	},
     {
@@ -396,7 +415,7 @@ function startCountdown() {
       $("msgpremio").textContent = "Conseguiste aguentar até aqui, e vais ter de ter um pouco mais de paciência.";
       $("msgpremiobold").textContent = "Ainda não esta pronto, mas não deves de desanimar. Toma lá mais esta pista.";
       $("msgrevelacao").textContent = "DIAS ATÉ À REVELAÇÃO FINAL";
-      $("msgdofinal").innerHTML = "Quanto o tempo acabar, a última pista de tou dar. Já sabes qual é a surpresa?";
+      $("msgdofinal").innerHTML = "Quanto o tempo acabar, uma última pista de tou dar. Obstante, já sabes qual é a surpresa?";
       $("daysLeft").textContent = days;
       $("countDetail").textContent =
         `Faltam ${days} dias e ${hours} horas para poderes reclamar o teu prémio!`;
@@ -508,9 +527,11 @@ function animateConfetti() {
 /* =========================================================
    INICIALIZAÇÃO DO JOGO
    ========================================================= */
+let jogoConcluido = false;
+let jogoIniciado = false;
+// Recupera o progresso sem mostrar ainda as perguntas.
 async function iniciarJogo() {
-    $("answerInput").disabled = true;
-    $("answerForm").querySelector("button").disabled = true;
+    $("startButton").disabled = true;
     try {
         const progresso = await lerProgresso();
         currentQuestion = Math.max(
@@ -520,23 +541,30 @@ async function iniciarJogo() {
                 CONFIG.questions.length
             )
         );
-        if (currentQuestion >= CONFIG.questions.length) {
-            $("game").classList.add("hidden");
-            $("finalScreen").classList.remove("hidden");
-            startCountdown();
-        } else {
-            renderQuestion();
-            $("answerInput").disabled = false;
-            $("answerForm").querySelector("button").disabled = false;
-        }
+        jogoConcluido = currentQuestion >= CONFIG.questions.length;
+        $("startButton").disabled = false;
     } catch (error) {
         console.error(error);
-        $("question").textContent = "Não foi possível recuperar o jogo.";
+        $("startButton").disabled = false;
         $("feedback").textContent =
-            "Verifica a ligação à Internet e tenta novamente.";
+            "Não foi possível recuperar o progresso. Verifica a ligação à Internet e tenta novamente.";
         $("feedback").className = "feedback error";
     }
 }
+// Só começa quando carregar no botão.
+$("startButton").addEventListener("click", () => {
+    if (jogoIniciado) return;
+    jogoIniciado = true;
+    $("introScreen").classList.add("hidden");
+    if (jogoConcluido) {
+        $("finalScreen").classList.remove("hidden");
+        startCountdown();
+    } else {
+        $("game").classList.remove("hidden");
+        renderQuestion();
+    }
+});
+ 
 
 iniciarJogo();
 </script>
