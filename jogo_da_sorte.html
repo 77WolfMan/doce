@@ -267,35 +267,37 @@ function stopPhaseSounds() {
 }
 
 /* Som da Fase 2 */
-function playWaitSound() {
+async function playWaitSound() {
     if (!waitSound.paused) return;
     fireworkSound.pause();
     fireworkSound.currentTime = 0;
     waitSound.currentTime = 0;
-    waitSound.play()
-        .then(() => {
-            $("activateSoundButton").classList.add("hidden");
-        })
-        .catch(error => {
-            console.warn("Reprodução automática da Fase 2 bloqueada:", error);
-            $("activateSoundButton").classList.remove("hidden");
-        });
+    try {
+        await waitSound.play();
+        $("activateSoundButton").classList.add("hidden");
+    } catch (error) {
+        console.warn("Erro no som da Fase 2:", error);
+        $("activateSoundButton").classList.remove("hidden");
+    }
 }
 
 /* Som da Fase 3 */
-function playFireworkSound() {
-    if (!fireworkSound.paused) return;
+async function playFireworkSound() {
+    // Interromper completamente o som da Fase 2
     waitSound.pause();
     waitSound.currentTime = 0;
+    // Preparar o som da Fase 3
+    fireworkSound.pause();
     fireworkSound.currentTime = 0;
-    fireworkSound.play()
-        .then(() => {
-            $("activateSoundButton").classList.add("hidden");
-        })
-        .catch(error => {
-            console.warn("Reprodução automática da Fase 3 bloqueada:", error);
-            $("activateSoundButton").classList.remove("hidden");
-        });
+    try {
+        await fireworkSound.play();
+
+        $("activateSoundButton").classList.add("hidden");
+
+    } catch (error) {
+        console.error("Erro no som da Fase 3:", error);
+        $("activateSoundButton").classList.remove("hidden");
+    }
 }
 
 /* Ativação manual do som */
@@ -538,7 +540,7 @@ function startCountdown() {
     }
   }
   update();
-  window.setInterval(update, 60000);
+  window.setInterval(update, 10000);
 }
 
 /* Pequena explosão de confettis em cada resposta certa. */
