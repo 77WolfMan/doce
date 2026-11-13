@@ -386,7 +386,7 @@ function startCountdown() {
       $("msgpremio").textContent = "Conseguiste chegar ao fim, mas vais ter de ter um pouco mais de paciência.";
       $("msgpremiobold").textContent = "Ainda não esta pronto, mas não deves de desanimar. Toma lá mais estas pistas.";
       $("msgrevelacao").textContent = "DIAS ATÉ À REVELAÇÃO FINAL";
-      $("msgdofinal").innerHTML = "Vim da Alemanha a acelerar, com os meus anéis a brilhar. <br>Não fui às Olimpíadas competir, e o meu nome significa ouvir. Quem sou?";
+      $("msgdofinal").innerHTML = "Quanto o tempo acabar, a última pista de tou dar. Já sabes qual é a surpresa?";
       $("daysLeft").textContent = days;
       $("countDetail").textContent =
         `Faltam ${days} dias e ${hours} horas para poderes reclamar o teu prémio!`;
@@ -409,6 +409,7 @@ function startCountdown() {
     // ==========================================
     else {
       $("daysLeft").textContent = "0";
+      $("msgdofinal").innerHTML = "Vim da Alemanha a acelerar, com os meus anéis a brilhar. <br>Não fui às Olimpíadas competir, e o meu nome significa ouvir. Quem sou?";
       $("countDetail").textContent =
         "Finalmente, podes reclamar o teu prémio";
       $("gpsBox").classList.remove("hidden");
