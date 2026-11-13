@@ -130,6 +130,7 @@
     <h2 id="frasepremio">O grande prémio esta a um passo!</h2>
     <p id="msgpremio">Conseguiste chegar até aqui. Já sabes qual é a surpresa?</p>
     <p id="msgpremiobold"><strong>Esta a ser preparado especialmente para ti, mas ainda que envolto em mistério.</strong></p>
+    <button type="button" id="activateSoundButton" class="hidden">ATIVAR SOM</button>
     <div class="count-panel">
       <div class="count-number" id="daysLeft">--</div>
       <div class="count-caption" id="msgrevelacao">DIAS ATÉ À PRÓXIMA REVELAÇÃO</div>
@@ -194,7 +195,7 @@ const CONFIG = {
       hint: "Agora já estás muito perto de descobrir a natureza do grande prémio."
     },
     {
-      question: "Não cabemos no porta-luvas, mas viajamos no teu coração,<br>Somos o teu porto seguro em qualquer direção.<br>A prenda que recebes é só uma pequena lembrança,<br>De quem te acompanha na vida com amor e esperança.<br><br>Quem somos?",
+      question: "Não cabemos no porta-luvas, mas viajamos no coração,<br>Somos o teu porto seguro em qualquer direção.<br>A prenda que recebes é só uma pequena lembrança,<br>De quem te acompanha na vida com amor e esperança.<br><br>Quem somos?",
       answers: ["família", "a família", "a Família", "familia", "a familia", "a Familia"],
       hint: "Esta é a adivinha mais importante de todas, somos o grupo de pessoas mais importante da tua vida."
     },
@@ -236,71 +237,60 @@ async function resetJogo() {
 /* =========================================================
    SISTEMA DE ÁUDIO
    ========================================================= */
-
-// SOM DE RESPOSTA CERTA
-const successSound = new Audio("Aplausos.mp3");
-successSound.preload = "auto";
-successSound.volume = 0.85;
-
-function playSuccessSound() {
-    successSound.pause();
-    successSound.currentTime = 0;
-    successSound.play().catch(error => {
-        console.error("Erro ao reproduzir aplausos:", error);
-    });
-}
-
-// SOM DE RESPOSTA ERRADA
-const wrongSound = new Audio("Errado.mp3");
-wrongSound.preload = "auto";
-wrongSound.volume = 0.85;
-
-function playWrongSound() {
-    wrongSound.pause();
-    wrongSound.currentTime = 0;
-    wrongSound.play().catch(error => {
-        console.error("Erro ao reproduzir som de erro:", error);
-    });
-}
-
-// SOM DA FASE 2 - ESPERA
-const WaitSound = new Audio("Espera.mp3");
-WaitSound.preload = "auto";
-WaitSound.volume = 0.85;
-WaitSound.loop = true;
-
-// SOM DA FASE 3 - FOGUETES
-const FireworkSound = new Audio("Foguetes.mp3");
-FireworkSound.preload = "auto";
-FireworkSound.volume = 0.85;
-FireworkSound.loop = true;
-
-// CONTROLO DOS SONS DAS FASES
+let somFasePretendida = 0;
+const activateSoundButton = $("activateSoundButton");
 function playWaitSound() {
-    if (!WaitSound.paused) return;
     FireworkSound.pause();
     FireworkSound.currentTime = 0;
-    WaitSound.play().catch(error => {
-        console.error("Erro ao reproduzir Espera.mp3:", error);
-    });
+    if (!WaitSound.paused) {
+        activateSoundButton.classList.add("hidden");
+        return;
+    }
+    WaitSound.play()
+        .then(() => {
+            activateSoundButton.classList.add("hidden");
+        })
+        .catch(error => {
+            console.warn("Reprodução automática de Espera.mp3 bloqueada:", error);
+            activateSoundButton.classList.remove("hidden");
+        });
 }
 
 function playFireworkSound() {
-    if (!FireworkSound.paused) return;
     WaitSound.pause();
     WaitSound.currentTime = 0;
-    FireworkSound.play().catch(error => {
-        console.error("Erro ao reproduzir Foguetes.mp3:", error);
-    });
+    if (!FireworkSound.paused) {
+        activateSoundButton.classList.add("hidden");
+        return;
+    }
+    FireworkSound.play()
+        .then(() => {
+            activateSoundButton.classList.add("hidden");
+        })
+        .catch(error => {
+            console.warn("Reprodução automática de Foguetes.mp3 bloqueada:", error);
+            activateSoundButton.classList.remove("hidden");
+        });
 }
 
 function stopPhaseSounds() {
     WaitSound.pause();
     WaitSound.currentTime = 0;
-
     FireworkSound.pause();
     FireworkSound.currentTime = 0;
+    somFasePretendida = 0;
+    activateSoundButton.classList.add("hidden");
 }
+
+// Ativação manual do som através de uma interação do utilizador
+activateSoundButton.addEventListener("click", function() {
+    if (somFasePretendida === 2) {
+        playWaitSound();
+    }
+    else if (somFasePretendida === 3) {
+        playFireworkSound();
+    }
+});
 
 
 /* =========================================================
@@ -468,7 +458,8 @@ function startCountdown() {
     // ==========================================
     else if (now < secondTarget) {
       // Reproduzir som da Fase 2
-	  playWaitSound();
+      somFasePretendida = 2;
+      playWaitSound();
       const distance = secondTarget - now;
       const days = Math.floor(distance / 86400000);
       const hours = Math.floor((distance % 86400000) / 3600000);
@@ -499,6 +490,7 @@ function startCountdown() {
     // ==========================================
     else {
       /// Reproduzir som da Fase 3
+      somFasePretendida = 3;
 	  playFireworkSound();
       $("daysLeft").textContent = "0";
       $("frasepremio").textContent = "Finalmente, o grande prémio é teu.";
@@ -618,9 +610,6 @@ async function iniciarJogo() {
 $("startButton").addEventListener("click", () => {
     if (jogoIniciado) return;
     jogoIniciado = true;
-    // Preparar o áudio através da interação do utilizador
-	WaitSound.load();
-	FireworkSound.load();
     $("introScreen").classList.add("hidden");
     if (jogoConcluido) {
         $("finalScreen").classList.remove("hidden");
