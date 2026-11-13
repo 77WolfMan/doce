@@ -142,7 +142,7 @@
     </div>
     <p class="hint" id="msgdofinal">Até lá, podes tentar adivinhar, pois algumas surpresas sabem melhores quando ficam em segredo.</p>
   </section>
-  <footer>Uma surpresa pensada especialmente só para ti</footer>
+  <footer><span id="resetLink" style="cursor:pointer;">Uma surpresa pensada especialmente só para ti</span></footer>
 </main>
 
 <script>
@@ -204,13 +204,30 @@ async function resetJogo() {
     if (!confirm("Tens a certeza que pretendes reiniciar o jogo?")) {
         return;
     }
-    if (CONFIG_GITHUB.modo === "TESTE") {
-        localStorage.removeItem(STORAGE_KEY);
-    } else {
-        alert("O reset em produção deverá ser feito através da GitHub API.");
-        return;
+    const link = $("resetLink");
+    link.textContent = "A reiniciar o jogo...";
+    link.style.pointerEvents = "none";
+    try {
+        const resposta = await fetch(CONFIG_GITHUB.api, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-Action": "RESET"
+            },
+            body: JSON.stringify({})
+        });
+        const resultado = await resposta.json();
+        if (!resposta.ok || !resultado.success) {
+            throw new Error(resultado.error || "Erro ao reiniciar o jogo.");
+        }
+        alert("O jogo foi reiniciado com sucesso!");
+        location.reload();
+    } catch (error) {
+        console.error("Erro no reset:", error);
+        alert("Não foi possível reiniciar o jogo.\n\n" + error.message);
+        link.textContent = "Uma surpresa pensada especialmente só para ti";
+        link.style.pointerEvents = "auto";
     }
-    location.reload();
 }
 
 
@@ -565,7 +582,7 @@ $("startButton").addEventListener("click", () => {
     }
 });
  
-
+$("resetLink").addEventListener("click", resetJogo);
 iniciarJogo();
 </script>
 </body>
