@@ -514,9 +514,21 @@ function startCountdown() {
     // FASE 3 - A PARTIR DE 22 DE FEVEREIRO
     // ==========================================
     else {
-      /// Reproduzir som da Fase 3
+      // Reproduzir som da Fase 3
       somFasePretendida = 3;
-	  playFireworkSound();
+      playFireworkSound();
+
+      // Confettis sem limite de repetições
+      if (fase3ConfettiInterval === null) {
+
+          // Primeira explosão imediata
+          launchConfetti(false);
+
+          // Novas explosões a cada 3 segundos
+          fase3ConfettiInterval = setInterval(function() {
+              launchConfetti(false);
+          }, 3000);
+      }
       $("daysLeft").textContent = "0";
       $("frasepremio").textContent = "Finalmente, o grande prémio é teu.";
       $("msgpremio").textContent = "A paciência é uma virtude e já o podes reclamar.";
@@ -548,6 +560,7 @@ const canvas = $("confetti");
 const ctx = canvas.getContext("2d");
 let particles = [];
 let animationFrame = null;
+let fase3ConfettiInterval = null;
 
 function resizeCanvas() {
   const ratio = Math.min(window.devicePixelRatio || 1, 2);
@@ -558,8 +571,8 @@ function resizeCanvas() {
 window.addEventListener("resize", resizeCanvas);
 resizeCanvas();
 
-function launchConfetti() {
-  playSuccessSound();
+function launchConfetti(reproduzirSom = true) {
+  if (reproduzirSom) playSuccessSound();
   if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
   const width = window.innerWidth;
   const height = window.innerHeight;
