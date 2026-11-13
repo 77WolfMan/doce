@@ -248,6 +248,15 @@ let somFasePretendida = 0;
 });
 waitSound.loop = true;
 fireworkSound.loop = true;
+function playSuccessSound() {
+    successSound.currentTime = 0;
+    successSound.play().catch(() => {});
+}
+
+function playWrongSound() {
+    wrongSound.currentTime = 0;
+    wrongSound.play().catch(() => {});
+}
 
 /* Parar sons das fases */
 function stopPhaseSounds() {
@@ -261,36 +270,48 @@ function stopPhaseSounds() {
 function playWaitSound() {
     if (!waitSound.paused) return;
     fireworkSound.pause();
+    fireworkSound.currentTime = 0;
     waitSound.currentTime = 0;
-    waitSound.play().catch(() => {
-        $("activateSoundButton").classList.remove("hidden");
-    });
+    waitSound.play()
+        .then(() => {
+            $("activateSoundButton").classList.add("hidden");
+        })
+        .catch(error => {
+            console.warn("Reprodução automática da Fase 2 bloqueada:", error);
+            $("activateSoundButton").classList.remove("hidden");
+        });
 }
 
 /* Som da Fase 3 */
 function playFireworkSound() {
     if (!fireworkSound.paused) return;
     waitSound.pause();
+    waitSound.currentTime = 0;
     fireworkSound.currentTime = 0;
-    fireworkSound.play().catch(() => {
-        $("activateSoundButton").classList.remove("hidden");
-    });
+    fireworkSound.play()
+        .then(() => {
+            $("activateSoundButton").classList.add("hidden");
+        })
+        .catch(error => {
+            console.warn("Reprodução automática da Fase 3 bloqueada:", error);
+            $("activateSoundButton").classList.remove("hidden");
+        });
 }
 
 /* Ativação manual do som */
 $("activateSoundButton").addEventListener("click", async function() {
     try {
+        stopPhaseSounds();
         if (somFasePretendida === 2) {
-            waitSound.currentTime = 0;
             await waitSound.play();
         }
         else if (somFasePretendida === 3) {
-            fireworkSound.currentTime = 0;
             await fireworkSound.play();
         }
         this.classList.add("hidden");
     } catch (erro) {
         console.error("Erro na reprodução do áudio:", erro);
+        this.classList.remove("hidden");
     }
 });
 
@@ -424,6 +445,7 @@ window.setTimeout(async () => {
     $("feedback").textContent = "Não seja molengão, joga com o coração. Só avanças se deres a resposta certa...";
     $("feedback").className = "feedback error";
     $("answerInput").select();
+    playWrongSound();
   }
 });
 
@@ -440,6 +462,7 @@ function startCountdown() {
     // ==========================================
     if (now < firstTarget) {
       stopPhaseSounds();
+      $("activateSoundButton").classList.add("hidden");
       const distance = firstTarget - now;
       const days = Math.floor(distance / 86400000);
       const hours = Math.floor((distance % 86400000) / 3600000);
@@ -534,6 +557,7 @@ window.addEventListener("resize", resizeCanvas);
 resizeCanvas();
 
 function launchConfetti() {
+  playSuccessSound();
   if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
   const width = window.innerWidth;
   const height = window.innerHeight;
