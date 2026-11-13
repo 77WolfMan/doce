@@ -237,8 +237,49 @@ async function resetJogo() {
 /* =========================================================
    SISTEMA DE ÁUDIO
    ========================================================= */
+
+// SOM DE RESPOSTA CERTA
+const successSound = new Audio("Aplausos.mp3");
+successSound.preload = "auto";
+successSound.volume = 0.85;
+
+function playSuccessSound() {
+    successSound.pause();
+    successSound.currentTime = 0;
+    successSound.play().catch(error => {
+        console.error("Erro ao reproduzir aplausos:", error);
+    });
+}
+
+// SOM DE RESPOSTA ERRADA
+const wrongSound = new Audio("Errado.mp3");
+wrongSound.preload = "auto";
+wrongSound.volume = 0.85;
+
+function playWrongSound() {
+    wrongSound.pause();
+    wrongSound.currentTime = 0;
+    wrongSound.play().catch(error => {
+        console.error("Erro ao reproduzir som de erro:", error);
+    });
+}
+
+// SOM DA FASE 2 - ESPERA
+const WaitSound = new Audio("Espera.mp3");
+WaitSound.preload = "auto";
+WaitSound.volume = 0.85;
+WaitSound.loop = true;
+
+// SOM DA FASE 3 - FOGUETES
+const FireworkSound = new Audio("Foguetes.mp3");
+FireworkSound.preload = "auto";
+FireworkSound.volume = 0.85;
+FireworkSound.loop = true;
+
+
+// CONTROLO DOS SONS DAS FASES
 let somFasePretendida = 0;
-const activateSoundButton = $("activateSoundButton");
+const activateSoundButton = document.getElementById("activateSoundButton");
 function playWaitSound() {
     FireworkSound.pause();
     FireworkSound.currentTime = 0;
@@ -251,7 +292,7 @@ function playWaitSound() {
             activateSoundButton.classList.add("hidden");
         })
         .catch(error => {
-            console.warn("Reprodução automática de Espera.mp3 bloqueada:", error);
+            console.warn("Reprodução de Espera.mp3 bloqueada:", error);
             activateSoundButton.classList.remove("hidden");
         });
 }
@@ -268,7 +309,7 @@ function playFireworkSound() {
             activateSoundButton.classList.add("hidden");
         })
         .catch(error => {
-            console.warn("Reprodução automática de Foguetes.mp3 bloqueada:", error);
+            console.warn("Reprodução de Foguetes.mp3 bloqueada:", error);
             activateSoundButton.classList.remove("hidden");
         });
 }
@@ -282,7 +323,7 @@ function stopPhaseSounds() {
     activateSoundButton.classList.add("hidden");
 }
 
-// Ativação manual do som através de uma interação do utilizador
+// ATIVAÇÃO MANUAL DO SOM
 activateSoundButton.addEventListener("click", function() {
     if (somFasePretendida === 2) {
         playWaitSound();
