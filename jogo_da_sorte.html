@@ -533,15 +533,12 @@ window.setTimeout(async () => {
 function startCountdown() {
   // Fase 1 termina: 24 de dezembro de 2026 às 20:00 GMT
   const firstTarget = Date.UTC(2026, 11, 24, 20, 0, 0);
-  //const firstTarget = new Date("2026-12-24T20:00:00+00:00").getTime(); //data via sistema, para testes...
-    
   // Fase 2 termina: 22 de fevereiro de 2027 às 00:00 GMT
   const secondTarget = Date.UTC(2027, 1, 22, 0, 0, 0);
-  //const secondTarget = new Date("2027-02-22T00:00:00+00:00").getTime(); //data via sistema, para testes...
   
   function update() {
-    const now = new Date().getTime();  // Hora actual universal (UTC/GMT)
-    //const now = Date.now(); //data via sistema, para testes...
+    if (!horaServidorSincronizada) return;
+    const now = obterHoraServidor();
     
     // ==========================================
     // FASE 1 - ANTES DE 24 DE DEZEMBRO ÀS 20:00
@@ -641,8 +638,34 @@ function startCountdown() {
       }
     }
   }
-  update();
-  window.setInterval(update, 10000);
+    // Primeira sincronização com o servidor
+  async function iniciarContagem() {
+      try {
+          await sincronizarHoraServidor();
+          update();
+      } catch (error) {
+          console.error("Erro na sincronização horária:", error);
+          $("countDetail").textContent =
+              "A sincronizar com o servidor. Aguarda alguns instantes...";
+      }
+      // Actualizar a contagem a cada 10 segundos
+      if (intervaloContagem === null) {
+          intervaloContagem = window.setInterval(update, 10000);
+      }
+      // Voltar a sincronizar a hora a cada 30 segundos
+      if (intervaloSincronizacao === null) {
+          intervaloSincronizacao = window.setInterval(async function() {
+              try {
+                  await sincronizarHoraServidor();
+                  update();
+              } catch (error) {
+
+                  console.error("Erro ao actualizar a hora do servidor:", error);
+              }
+          }, 30000);
+      }
+  }
+  iniciarContagem();
 }
 
 /* Pequena explosão de confettis em cada resposta certa. */
