@@ -298,7 +298,7 @@ async function playQuaseSound() {
         console.log("Som da Fase 1 iniciado.");
     } catch (error) {
         console.warn("Erro no som da Fase 1:", error);
-        $("activateSoundButton").classList.add("hidden");
+        $("activateSoundButton").classList.remove("hidden");
     }
 }
 
@@ -313,7 +313,7 @@ async function playWaitSound() {
         $("activateSoundButton").classList.add("hidden");
     } catch (error) {
         console.warn("Erro no som da Fase 2:", error);
-        $("activateSoundButton").classList.add("hidden");
+        $("activateSoundButton").classList.remove("hidden");
     }
 }
 
@@ -332,7 +332,7 @@ async function playFireworkSound() {
         console.log("Som da Fase 3 iniciado com sucesso.");
     } catch (error) {
         console.error("Erro no som da Fase 3:", error);
-        $("activateSoundButton").classList.add("hidden");
+        $("activateSoundButton").classList.remove("hidden");
     }
 }
 
