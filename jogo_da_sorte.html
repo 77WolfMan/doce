@@ -298,7 +298,7 @@ async function playQuaseSound() {
         console.log("Som da Fase 1 iniciado.");
     } catch (error) {
         console.warn("Erro no som da Fase 1:", error);
-        $("activateSoundButton").classList.remove("hidden");
+        $("activateSoundButton").classList.add("hidden");
     }
 }
 
@@ -313,7 +313,7 @@ async function playWaitSound() {
         $("activateSoundButton").classList.add("hidden");
     } catch (error) {
         console.warn("Erro no som da Fase 2:", error);
-        $("activateSoundButton").classList.remove("hidden");
+        $("activateSoundButton").classList.add("hidden");
     }
 }
 
@@ -332,7 +332,7 @@ async function playFireworkSound() {
         console.log("Som da Fase 3 iniciado com sucesso.");
     } catch (error) {
         console.error("Erro no som da Fase 3:", error);
-        $("activateSoundButton").classList.remove("hidden");
+        $("activateSoundButton").classList.add("hidden");
     }
 }
 
@@ -342,15 +342,12 @@ function iniciarSomPorInteracao() {
     let som;
     if (somFasePretendida === 1) {
         som = QuaseSound;
-    }
-    else if (somFasePretendida === 2) {
+    } else if (somFasePretendida === 2) {
         som = waitSound;
-    }
-    else if (somFasePretendida === 3) {
+    } else if (somFasePretendida === 3) {
         som = fireworkSound;
     }
     if (!som) return;
-    // Parar os outros sons
     [QuaseSound, waitSound, fireworkSound].forEach(audio => {
         if (audio !== som) {
             audio.pause();
@@ -358,20 +355,12 @@ function iniciarSomPorInteracao() {
         }
     });
     som.play().then(() => {
-        console.log("Som iniciado com sucesso.");
         $("activateSoundButton").classList.add("hidden");
         removerListenersSom();
     }).catch(error => {
         console.warn("O browser bloqueou o áudio:", error);
-        $("activateSoundButton").classList.remove("hidden");
+        $("activateSoundButton").classList.add("hidden");
     });
-}
-
-function removerListenersSom() {
-    window.removeEventListener("pointerdown", iniciarSomPorInteracao);
-    window.removeEventListener("mousemove", iniciarSomPorInteracao);
-    window.removeEventListener("keydown", iniciarSomPorInteracao);
-
 }
 
 /* Ativação manual do som */
@@ -636,7 +625,12 @@ function startCountdown() {
     }
   }
   update();
-  window.setInterval(update, 10000);
+// Tentar iniciar automaticamente o som da fase correspondente
+setTimeout(() => {
+    iniciarSomPorInteracao();
+}, 300);
+// Reavaliar a fase a cada 10 segundos
+window.setInterval(update, 10000);
 }
 
 /* Pequena explosão de confettis em cada resposta certa. */
