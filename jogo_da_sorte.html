@@ -682,6 +682,14 @@ async function iniciarJogo() {
         );
         jogoConcluido = currentQuestion >= CONFIG.questions.length;
         $("startButton").disabled = false;
+        // SE O JOGO JÁ ESTIVER CONCLUÍDO
+        if (jogoConcluido) {
+            $("introScreen").classList.add("hidden");
+            $("game").classList.add("hidden");
+            $("finalScreen").classList.remove("hidden");
+            jogoIniciado = true;
+            startCountdown();
+        }
     } catch (error) {
         console.error(error);
         $("startButton").disabled = false;
