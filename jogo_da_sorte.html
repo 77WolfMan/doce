@@ -529,12 +529,52 @@ window.setTimeout(async () => {
   }
 });
 
+/* =========================================================
+   SINCRONIZAÇÃO DA HORA COM O SERVIDOR CLOUDFLARE
+   ========================================================= */
+let diferencaHoraServidor = 0;
+let horaServidorSincronizada = false;
+let intervaloContagem = null;
+let intervaloSincronizacao = null;
+async function sincronizarHoraServidor() {
+    const inicioPedido = performance.now();
+    const resposta = await fetch(
+        CONFIG_GITHUB.api + "?action=time&_=" + Date.now(),
+        {
+            method: "GET",
+            cache: "no-store"
+        }
+    );
+    const fimPedido = performance.now();
+    if (!resposta.ok) {
+        throw new Error("Não foi possível obter a hora do servidor.");
+    }
+    const dados = await resposta.json();
+    const horaServidor = Date.parse(dados.serverTime);
+    if (!Number.isFinite(horaServidor)) {
+        throw new Error("A hora recebida do servidor é inválida.");
+    }
+    // Usa um relógio monotónico, independente da hora do computador.
+    const momentoMedio = (inicioPedido + fimPedido) / 2;
+    diferencaHoraServidor = horaServidor - momentoMedio;
+    horaServidorSincronizada = true;
+    console.log(
+        "Hora UTC do servidor sincronizada:",
+        new Date(obterHoraServidor()).toISOString()
+    );
+}
+
+function obterHoraServidor() {
+    if (!horaServidorSincronizada) {
+        throw new Error("Hora do servidor ainda não sincronizada.");
+    }
+    return performance.now() + diferencaHoraServidor;
+}
+
 /* Contagem decrescente e desbloqueio automático das coordenadas. */
 function startCountdown() {
-  // Fase 1 termina: 24 de dezembro de 2026 às 20:00 GMT
-  const firstTarget = Date.UTC(2026, 11, 24, 20, 0, 0);
-  // Fase 2 termina: 22 de fevereiro de 2027 às 00:00 GMT
-  const secondTarget = Date.UTC(2027, 1, 22, 0, 0, 0);
+  const firstTarget = Date.UTC(2026, 11, 24, 20, 0, 0);  // Fase 1 termina: 24 de dezembro de 2026 às 20:00 GMT
+  const secondTarget = Date.UTC(2027, 1, 22, 0, 0, 0);   // Fase 2 termina: 22 de fevereiro de 2027 às 00:00 GMT
   
   function update() {
     if (!horaServidorSincronizada) return;
