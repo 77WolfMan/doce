@@ -531,12 +531,18 @@ window.setTimeout(async () => {
 
 /* Contagem decrescente e desbloqueio automático das coordenadas. */
 function startCountdown() {
-  // Primeira revelação: 24 de dezembro de 2026 às 20:00
-  const firstTarget = new Date("2026-12-24T20:00:00+00:00").getTime();
-  // Segunda revelação: 22 de fevereiro de 2027 às 00:00
-  const secondTarget = new Date("2027-02-22T00:00:00+00:00").getTime();
+  // Fase 1 termina: 24 de dezembro de 2026 às 20:00 GMT
+  const firstTarget = Date.UTC(2026, 11, 24, 20, 0, 0);
+  //const firstTarget = new Date("2026-12-24T20:00:00+00:00").getTime(); //data via sistema, para testes...
+    
+  // Fase 2 termina: 22 de fevereiro de 2027 às 00:00 GMT
+  const secondTarget = Date.UTC(2027, 1, 22, 0, 0, 0);
+  //const secondTarget = new Date("2027-02-22T00:00:00+00:00").getTime(); //data via sistema, para testes...
+  
   function update() {
-    const now = Date.now();
+    const now = new Date().getTime();  // Hora actual universal (UTC/GMT)
+    //const now = Date.now(); //data via sistema, para testes...
+    
     // ==========================================
     // FASE 1 - ANTES DE 24 DE DEZEMBRO ÀS 20:00
     // ==========================================
