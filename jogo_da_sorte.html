@@ -339,23 +339,25 @@ async function playFireworkSound() {
 /* Ativação automática do som na primeira interação */
 function iniciarSomPorInteracao() {
     if (somFasePretendida === 0) return;
-    window.removeEventListener("pointerdown", iniciarSomPorInteracao);
-    window.removeEventListener("keydown", iniciarSomPorInteracao);
-    window.removeEventListener("touchstart", iniciarSomPorInteracao);
-    window.removeEventListener("mousemove", iniciarSomPorInteracao);
+    let som;
     if (somFasePretendida === 1) {
-        playQuaseSound();
+        som = quasiSound;
     }
     else if (somFasePretendida === 2) {
-        playWaitSound();
+        som = waitSound;
     }
     else if (somFasePretendida === 3) {
-        playFireworkSound();
+        som = fireworkSound;
     }
+    if (!som) return;
+    som.play().then(() => {
+        window.removeEventListener("pointerdown", iniciarSomPorInteracao);
+        window.removeEventListener("mousemove", iniciarSomPorInteracao);
+    }).catch(error => {
+        console.log("O browser ainda não autorizou a reprodução:", error);
+    });
 }
 window.addEventListener("pointerdown", iniciarSomPorInteracao);
-window.addEventListener("keydown", iniciarSomPorInteracao);
-window.addEventListener("touchstart", iniciarSomPorInteracao);
 window.addEventListener("mousemove", iniciarSomPorInteracao);
 
 /* Ativação manual do som */
