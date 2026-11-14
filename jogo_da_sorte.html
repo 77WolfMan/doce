@@ -339,29 +339,39 @@ async function playFireworkSound() {
 /* Ativação automática do som na primeira interação */
 function iniciarSomPorInteracao() {
     if (somFasePretendida === 0) return;
-    let resultado;
+    let som;
     if (somFasePretendida === 1) {
-        resultado = playQuaseSound();
+        som = QuaseSound;
     }
     else if (somFasePretendida === 2) {
-        resultado = playWaitSound();
+        som = waitSound;
     }
     else if (somFasePretendida === 3) {
-        resultado = playFireworkSound();
+        som = fireworkSound;
     }
-    if (resultado && typeof resultado.then === "function") {
-        resultado.then(() => {
-            removerListenersSom();
-        }).catch(error => {
-            console.log("Áudio ainda bloqueado:", error);
-        });
-    }
+    if (!som) return;
+    // Parar os outros sons
+    [QuaseSound, waitSound, fireworkSound].forEach(audio => {
+        if (audio !== som) {
+            audio.pause();
+            audio.currentTime = 0;
+        }
+    });
+    som.play().then(() => {
+        console.log("Som iniciado com sucesso.");
+        $("activateSoundButton").classList.add("hidden");
+        removerListenersSom();
+    }).catch(error => {
+        console.warn("O browser bloqueou o áudio:", error);
+        $("activateSoundButton").classList.remove("hidden");
+    });
 }
 
 function removerListenersSom() {
     window.removeEventListener("pointerdown", iniciarSomPorInteracao);
     window.removeEventListener("mousemove", iniciarSomPorInteracao);
     window.removeEventListener("keydown", iniciarSomPorInteracao);
+
 }
 
 /* Ativação manual do som */
