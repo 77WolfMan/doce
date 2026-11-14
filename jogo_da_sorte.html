@@ -336,6 +336,24 @@ async function playFireworkSound() {
     }
 }
 
+/* Ativação automática do som na primeira interação */
+function iniciarSomPorInteracao() {
+    if (somFasePretendida === 0) return;
+    window.removeEventListener("pointerdown", iniciarSomPorInteracao);
+    window.removeEventListener("keydown", iniciarSomPorInteracao);
+    if (somFasePretendida === 1) {
+        playQuaseSound();
+    }
+    else if (somFasePretendida === 2) {
+        playWaitSound();
+    }
+    else if (somFasePretendida === 3) {
+        playFireworkSound();
+    }
+}
+window.addEventListener("pointerdown", iniciarSomPorInteracao);
+window.addEventListener("keydown", iniciarSomPorInteracao);
+
 /* Ativação manual do som */
 $("activateSoundButton").addEventListener("click", async function() {
     try {
