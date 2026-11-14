@@ -5,278 +5,599 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="theme-color" content="#10131b">
 <title>O Grande Jogo da Sorte</title>
+
 <style>
-  :root {
-    --bg:#10131b; --panel:#191f2b; --panel2:#202838; --gold:#e9bd62;
-    --gold2:#ffdf91; --text:#f5f2ea; --muted:#aeb6c5; --line:#343d4d;
-    --good:#72d6a0; --bad:#ff8585;
-  }
-  * { box-sizing:border-box; }
-  body { margin:0; min-height:100vh; color:var(--text);
+:root {
+    --bg:#10131b;
+    --panel:#191f2b;
+    --panel2:#202838;
+    --gold:#e9bd62;
+    --gold2:#ffdf91;
+    --text:#f5f2ea;
+    --muted:#aeb6c5;
+    --line:#343d4d;
+    --good:#72d6a0;
+    --bad:#ff8585;
+}
+
+* { box-sizing:border-box; }
+
+body {
+    margin:0;
+    min-height:100vh;
+    color:var(--text);
     background:
         linear-gradient(rgba(16,19,27,0.85), rgba(16,19,27,0.65)),
         url("Fundo.jpg") center center / cover no-repeat fixed;
-
     font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
     display:flex;
     justify-content:center;
-    padding:28px 16px 50px;}
-    
-  .wrap { width:min(860px,100%); }
-  header { text-align:center; margin:8px 0 24px; }
-  .eyebrow { color:var(--gold); letter-spacing:.24em; font-size:.72rem; font-weight:700; }
-  h1 { margin:9px 0 7px; font-family:Georgia,serif; font-size:clamp(2rem,7vw,3.35rem); font-weight:500; letter-spacing:.02em; }
-  .subtitle { color:var(--muted); margin:0; font-size:.98rem; }
-  .game-card {
+    padding:28px 16px 50px;
+}
+
+.wrap { width:min(860px,100%); }
+
+header {
+    text-align:center;
+    margin:8px 0 24px;
+}
+
+.eyebrow {
+    color:var(--gold);
+    letter-spacing:.24em;
+    font-size:.72rem;
+    font-weight:700;
+}
+
+h1 {
+    margin:9px 0 7px;
+    font-family:Georgia,serif;
+    font-size:clamp(2rem,7vw,3.35rem);
+    font-weight:500;
+    letter-spacing:.02em;
+}
+
+.subtitle {
+    color:var(--muted);
+    margin:0;
+    font-size:.98rem;
+}
+
+.game-card {
     background:linear-gradient(145deg,rgba(32,40,56,.97),rgba(22,28,39,.98));
-    border:1px solid rgba(233,189,98,.38); border-radius:22px;
-    padding:clamp(20px,5vw,38px); box-shadow:0 24px 70px #0007;
-  }
-  .topline { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:20px; }
-  .level { color:var(--gold2); font-size:.78rem; letter-spacing:.12em; text-transform:uppercase; }
-  .progress { display:flex; gap:7px; margin:0 0 28px; }
-  .progress span { height:5px; flex:1; background:#3b4556; border-radius:10px; }
-  .progress span.done { background:linear-gradient(90deg,var(--gold),var(--gold2)); }
-  .question-label { color:var(--gold); text-transform:uppercase; letter-spacing:.16em; font-size:.72rem; font-weight:700; }
-  h2 { font-family:Georgia,serif; font-weight:500; font-size:clamp(1.45rem,4vw,2rem); line-height:1.35; margin:12px 0 22px; }
-  .answer-row { display:flex; gap:10px; }
-  input {
-    min-width:0; flex:1; padding:15px 16px; border-radius:12px;
-    border:1px solid #536074; background:#111722; color:white; font-size:1rem;
+    border:1px solid rgba(233,189,98,.38);
+    border-radius:22px;
+    padding:clamp(20px,5vw,38px);
+    box-shadow:0 24px 70px #0007;
+}
+
+.topline {
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+    margin-bottom:20px;
+}
+
+.level {
+    color:var(--gold2);
+    font-size:.78rem;
+    letter-spacing:.12em;
+    text-transform:uppercase;
+}
+
+.progress {
+    display:flex;
+    gap:7px;
+    margin:0 0 28px;
+}
+
+.progress span {
+    height:5px;
+    flex:1;
+    background:#3b4556;
+    border-radius:10px;
+}
+
+.progress span.done {
+    background:linear-gradient(90deg,var(--gold),var(--gold2));
+}
+
+.question-label {
+    color:var(--gold);
+    text-transform:uppercase;
+    letter-spacing:.16em;
+    font-size:.72rem;
+    font-weight:700;
+}
+
+h2 {
+    font-family:Georgia,serif;
+    font-weight:500;
+    font-size:clamp(1.45rem,4vw,2rem);
+    line-height:1.35;
+    margin:12px 0 22px;
+}
+
+.answer-row {
+    display:flex;
+    gap:10px;
+}
+
+input {
+    min-width:0;
+    flex:1;
+    padding:15px 16px;
+    border-radius:12px;
+    border:1px solid #536074;
+    background:#111722;
+    color:white;
+    font-size:1rem;
     outline:none;
-  }
-  input:focus { border-color:var(--gold); box-shadow:0 0 0 3px #e9bd6226; }
-  button {
-    border:0; border-radius:12px; padding:14px 20px; cursor:pointer;
-    background:linear-gradient(135deg,var(--gold2),var(--gold)); color:#211a0d;
-    font-weight:800; font-size:.95rem; min-height:50px;
-  }
-  button:hover { filter:brightness(1.06); }
-  button:focus-visible { outline:3px solid white; outline-offset:3px; }
-  .feedback { min-height:28px; margin:13px 0 0; color:var(--muted); font-size:.9rem; }
-  .feedback.error { color:var(--bad); }
-  .hint { margin-top:18px; padding-top:16px; border-top:1px solid var(--line); color:var(--muted); font-size:.83rem; }
-  .hidden { display:none !important; }
-  .success { text-align:center; }
-  .success .trophy { font-size:3rem; margin:4px 0 10px; }
-  .success h2 { color:var(--gold2); }
-  .count-panel { margin:24px 0 14px; padding:22px 14px; border:1px solid #8c7447; border-radius:16px; background:#11172299; }
-  .count-number { color:var(--gold2); font-size:clamp(2.5rem,10vw,4.5rem); font-weight:750; line-height:1; font-variant-numeric:tabular-nums; }
-  .count-caption { margin-top:9px; color:var(--muted); text-transform:uppercase; letter-spacing:.18em; font-size:.72rem; }
-  .count-detail { color:var(--muted); margin:12px 0 0; font-size:.85rem; }
-  .gps-box { margin-top:22px; padding:20px; border-radius:15px; border:1px dashed var(--gold); background:#e9bd6210; }
-  .gps-coords { font-size:1.15rem; font-weight:700; letter-spacing:.04em; overflow-wrap:anywhere; color:var(--gold2); }
-  .map-link { display:inline-block; margin-top:14px; color:var(--gold2); }
-  footer { text-align:center; color:#7f8999; font-size:.75rem; margin:20px 0 0; }
-  #confetti { position:fixed; inset:0; width:100%; height:100%; pointer-events:none; z-index:10; }
-  @media(max-width:520px) {
+}
+
+input:focus {
+    border-color:var(--gold);
+    box-shadow:0 0 0 3px #e9bd6226;
+}
+
+button {
+    border:0;
+    border-radius:12px;
+    padding:14px 20px;
+    cursor:pointer;
+    background:linear-gradient(135deg,var(--gold2),var(--gold));
+    color:#211a0d;
+    font-weight:800;
+    font-size:.95rem;
+    min-height:50px;
+}
+
+button:hover { filter:brightness(1.06); }
+
+button:disabled {
+    opacity:.5;
+    cursor:not-allowed;
+}
+
+button:focus-visible {
+    outline:3px solid white;
+    outline-offset:3px;
+}
+
+.feedback {
+    min-height:28px;
+    margin:13px 0 0;
+    color:var(--muted);
+    font-size:.9rem;
+}
+
+.feedback.error { color:var(--bad); }
+
+.hint {
+    margin-top:18px;
+    padding-top:16px;
+    border-top:1px solid var(--line);
+    color:var(--muted);
+    font-size:.83rem;
+}
+
+.hidden { display:none !important; }
+
+.success { text-align:center; }
+
+.success .trophy {
+    font-size:3rem;
+    margin:4px 0 10px;
+}
+
+.success h2 { color:var(--gold2); }
+
+.count-panel {
+    margin:24px 0 14px;
+    padding:22px 14px;
+    border:1px solid #8c7447;
+    border-radius:16px;
+    background:#11172299;
+}
+
+.count-number {
+    color:var(--gold2);
+    font-size:clamp(2.5rem,10vw,4.5rem);
+    font-weight:750;
+    line-height:1;
+    font-variant-numeric:tabular-nums;
+}
+
+.count-caption {
+    margin-top:9px;
+    color:var(--muted);
+    text-transform:uppercase;
+    letter-spacing:.18em;
+    font-size:.72rem;
+}
+
+.count-detail {
+    color:var(--muted);
+    margin:12px 0 0;
+    font-size:.85rem;
+}
+
+.gps-box {
+    margin-top:22px;
+    padding:20px;
+    border-radius:15px;
+    border:1px dashed var(--gold);
+    background:#e9bd6210;
+}
+
+.gps-coords {
+    font-size:1.15rem;
+    font-weight:700;
+    letter-spacing:.04em;
+    overflow-wrap:anywhere;
+    color:var(--gold2);
+}
+
+.map-link {
+    display:inline-block;
+    margin-top:14px;
+    color:var(--gold2);
+}
+
+footer {
+    text-align:center;
+    color:#7f8999;
+    font-size:.75rem;
+    margin:20px 0 0;
+}
+
+#confetti {
+    position:fixed;
+    inset:0;
+    width:100%;
+    height:100%;
+    pointer-events:none;
+    z-index:10;
+}
+
+@media(max-width:520px) {
     .answer-row { flex-direction:column; }
     .answer-row button { width:100%; }
-    .topline { align-items:flex-start; flex-direction:column; }
-  }
-  @media(prefers-reduced-motion:reduce) { *,*::before,*::after { scroll-behavior:auto !important; animation:none !important; transition:none !important; } }
+    .topline {
+        align-items:flex-start;
+        flex-direction:column;
+    }
+}
+
+@media(prefers-reduced-motion:reduce) {
+    *,*::before,*::after {
+        scroll-behavior:auto !important;
+        animation:none !important;
+        transition:none !important;
+    }
+}
 </style>
 </head>
+
 <body>
+
 <canvas id="confetti" aria-hidden="true"></canvas>
+
 <main class="wrap">
-  <header>
+
+<header>
     <div class="eyebrow">UMA EXPERIÊNCIA ESPECIAL</div>
     <h1>O Grande Jogo da Sorte</h1>
-    <p class="subtitle">Perguntinha a perguntinha,... e um grande prémio no final poderás ganhar.</p>
-  </header>
+    <p class="subtitle">
+        Perguntinha a perguntinha,... e um grande prémio no final poderás ganhar.
+    </p>
+</header>
 
-    <!-- ECRÃ DE APRESENTAÇÃO INICIAL -->
-  <section class="game-card" id="introScreen">
+<!-- ECRÃ INICIAL -->
+
+<section class="game-card" id="introScreen">
+
     <div class="eyebrow">UMA SURPRESA ESTÁ À TUA ESPERA</div>
-    <h2>Há prémios que se ganham.<br>E há surpresas que são preparadas com o coração.</h2>
-    <p class="intro-copy">
-      Hoje começa uma aventura especial. Pelo caminho vais encontrar perguntas,
-      enigmas e pequenas pistas. Cada resposta certa aproxima-te de um prémio
-      muito especial, mas nem tudo será revelado de imediato.
-    </p>
-    <p class="intro-copy">
-      Respira fundo, concentra-te e deixa-te levar pelo jogo.
-      Só precisas de uma coisa: chegar ao fim e ter um pouco de paciência.
-    </p>
-    <p style="color:var(--gold2);font-weight:700;margin:22px 0">
-      Estás pronta?
-    </p>
-    <button type="button" id="startButton">COMEÇAR A JOGAR</button>
-  </section>
-  
-  <section class="game-card hidden" id="game">
-    <div class="topline">
-      <div class="level" id="levelLabel">NÍVEL 01 / 06</div>
-    </div>
-    <div class="progress" id="progress" aria-label="Progresso do jogo">
-      <span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span>
-    </div>
-    <div class="question-label">A tua próxima missão:</div>
-    <h2 id="question">A carregar a primeira pergunta...</h2>
-    <form id="answerForm">
-      <div class="answer-row">
-        <input id="answerInput" type="text" autocomplete="off" placeholder="Escreve a tua resposta..." aria-label="A tua resposta" required>
-        <button type="submit">ACERTEI?</button>
-      </div>
-    </form>
-    <p class="feedback" id="feedback" aria-live="polite"></p>
-    <div class="hint" id="hint">Só a resposta certa, te vai permitir avançar. Boa sorte!</div>
-  </section>
 
-  <section class="game-card success hidden" id="finalScreen">
+    <h2>
+        Há prémios que se ganham.<br>
+        E há surpresas que são preparadas com o coração.
+    </h2>
+
+    <p class="intro-copy">
+        Hoje começa uma aventura especial. Pelo caminho vais encontrar perguntas,
+        enigmas e pequenas pistas. Cada resposta certa aproxima-te de um prémio
+        muito especial, mas nem tudo será revelado de imediato.
+    </p>
+
+    <p class="intro-copy">
+        Respira fundo, concentra-te e deixa-te levar pelo jogo.
+        Só precisas de uma coisa: chegar ao fim e ter um pouco de paciência.
+    </p>
+
+    <p style="color:var(--gold2);font-weight:700;margin:22px 0">
+        Estás pronta?
+    </p>
+
+    <button type="button" id="startButton">
+        COMEÇAR A JOGAR
+    </button>
+
+</section>
+
+
+<!-- ECRÃ DE PERGUNTAS -->
+
+<section class="game-card hidden" id="game">
+
+    <div class="topline">
+        <div class="level" id="levelLabel">NÍVEL 01 / 11</div>
+    </div>
+
+    <div class="progress" id="progress" aria-label="Progresso do jogo">
+        <span></span><span></span><span></span><span></span>
+        <span></span><span></span><span></span><span></span>
+        <span></span><span></span><span></span>
+    </div>
+
+    <div class="question-label">A tua próxima missão:</div>
+
+    <h2 id="question">A carregar a primeira pergunta...</h2>
+
+    <form id="answerForm">
+
+        <div class="answer-row">
+
+            <input
+                id="answerInput"
+                type="text"
+                autocomplete="off"
+                placeholder="Escreve a tua resposta..."
+                aria-label="A tua resposta"
+                required
+            >
+
+            <button type="submit">ACERTEI?</button>
+
+        </div>
+
+    </form>
+
+    <p class="feedback" id="feedback" aria-live="polite"></p>
+
+    <div class="hint" id="hint">
+        Só a resposta certa te vai permitir avançar. Boa sorte!
+    </div>
+
+</section>
+
+
+<!-- ECRÃ FINAL -->
+
+<section class="game-card success hidden" id="finalScreen">
+
     <div class="trophy">✦</div>
+
     <div class="eyebrow">MISSÃO CONCLUÍDA</div>
-    <h2 id="frasepremio">O grande prémio esta a um passo!</h2>
-    <p id="msgpremio">Conseguiste chegar até aqui. Já sabes qual é a surpresa?</p>
-    <p id="msgpremiobold"><strong>Esta a ser preparado especialmente para ti, mas ainda que envolto em mistério.</strong></p>
-    <button type="button" id="activateSoundButton" class="hidden">🔊 ACTIVAR SOM</button>
+
+    <h2 id="frasepremio">
+        O grande prémio está a um passo!
+    </h2>
+
+    <p id="msgpremio">
+        Conseguiste chegar até aqui. Já sabes qual é a surpresa?
+    </p>
+
+    <p id="msgpremiobold">
+        <strong>
+            Está a ser preparado especialmente para ti, mas ainda envolto em mistério.
+        </strong>
+    </p>
+
+    <button
+        type="button"
+        id="activateSoundButton"
+        class="hidden"
+    >
+        🔊 ACTIVAR SOM
+    </button>
+
     <div class="count-panel">
-      <div class="count-number" id="daysLeft">--</div>
-      <div class="count-caption" id="msgrevelacao">DIAS ATÉ À PRÓXIMA REVELAÇÃO</div>
-      <p class="count-detail" id="countDetail">Na noite de 24 de dezembro, será revelado o local onde poderás encontrar o teu prémio.</p>
+
+        <div class="count-number" id="daysLeft">--</div>
+
+        <div class="count-caption" id="msgrevelacao">
+            DIAS ATÉ À PRÓXIMA REVELAÇÃO
+        </div>
+
+        <p class="count-detail" id="countDetail">
+            A aguardar informação do servidor...
+        </p>
+
     </div>
+
     <div id="gpsBox" class="gps-box hidden">
-      <div class="question-label">O destino espera por ti aqui</div>
-      <p class="gps-coords" id="gpsCoordinates"></p>
-      <a class="map-link" id="mapLink" href="#" target="_blank" rel="noopener">MOSTRAR NO MAPA</a>
+
+        <div class="question-label">
+            O destino espera por ti aqui
+        </div>
+
+        <p class="gps-coords" id="gpsCoordinates"></p>
+
+        <a
+            class="map-link"
+            id="mapLink"
+            href="#"
+            target="_blank"
+            rel="noopener"
+        >
+            MOSTRAR NO MAPA
+        </a>
+
     </div>
-    <p class="hint" id="msgdofinal">Até lá, podes tentar adivinhar, pois algumas surpresas sabem melhores quando ficam em segredo.</p>
-  </section>
-  <footer><span id="resetLink" style="cursor:pointer;">Uma surpresa pensada especialmente só para ti</span></footer>
+
+    <p class="hint" id="msgdofinal">
+        Até lá, podes tentar adivinhar, pois algumas surpresas sabem melhor quando ficam em segredo.
+    </p>
+
+</section>
+
+
+<footer>
+    <span id="resetLink" style="cursor:pointer;">
+        Uma surpresa pensada especialmente só para ti
+    </span>
+</footer>
+
 </main>
 
+
 <script>
+
 /* =========================================================
-   PERSONALIZAÇÃO DO JOGO
-   1) Altera as perguntas e respostas dentro de "questions".
-   2) Mantém a resposta certa em "answers".
-   3) Podes indicar várias respostas aceites, se necessário.
+   CONFIGURAÇÃO
    ========================================================= */
 
 const CONFIG = {
-  // SUBSTITUI pelos valores reais antes de publicares o site.
-  gpsCoordinates: "41.11525525738545, -8.628557681014332",
 
-  questions: [
-    {
-      question: "Vamos começar pelo mais importante:<br>Para quem foi preparada esta surpresa especial?",
-      answers: ["Sónia", "Sonia"],
-      hint: "É alguém muito especial para quem preparou este jogo."
-    },
-    {
-      question: "Tenho uma agulha, mas não sei coser,<br>Não tenho olhos, mas ajudo-te a ver.<br>Aponto o caminho sem nunca falar,<br>E procuro sempre o norte para te guiar.<br><br>O que sou?",
-      answers: ["bússola", "a bússola"],
-      hint: "Pensa num instrumento de orientação."
-    },
-    {
-      question: "Levo-te longe, mas nunca dou um passo,<br>Tenho linhas pintadas a marcar o traço.<br>Aguento o peso de quem passa por mim,<br>E ligo o início ao teu destino no fim.<br><br>O que sou?",
-      answers: ["estrada", "uma estrada", "a estrada"],
-      hint: "É por lá que as viagens começam."
-    },
-    {
-      question: "Não se compra, não se empresta<br>e nem sempre é fácil de encontrar.<br>Ajuda-nos a esperar pelo momento certo,<br>sem perder o entusiasmo.<br><br>O que é?",
-      answers: ["paciência", "a Paciência"],
-      hint: "É uma virtude essencial para manter a calma quando algo demora."
-    },
-    {
-      question: "Sou arredondado, mas não sou uma roda,<br>Sem tocar no chão, decido a rota.<br>Sem mim não há curva nem direção,<br>Viajo sempre agarrado à tua mão.<br><br>O que sou?",
-      answers: ["volante", "o volante"],
-      hint: "É uma peça que encontramos no interior de muitos veículos."
-    },
-    {
-      question: "Tenho páginas, mas não conto nenhuma história,<br>Guardo carimbos e datas que ficam na tua memória.<br>Sem mim, não podes cruzar o céu nem o mar,<br>Sou o teu bilhete dourado para o mundo explorar.<br><br>O que sou?",
-      answers: ["passaporte", "o passaporte", "o Passaporte"],
-      hint: "É um documento oficial indispensável para viajar para fora do país."
-    },
-    {
-      question: "Não sou farol, mas ajudo a ver,<br>Tudo o que na estrada pode acontecer.<br>Olho nos espelhos e sigo cada sinal,<br>Se me deixares em casa, a viagem corre mal.<br><br>O que sou?",
-      answers: ["atenção", "a atenção", "a Atenção", "concentração", "a concentração", "atento"],
-      hint: "É o oposto da distração quando estamos a conduzir."
-	},
-    {
-      question: "Sigo as tuas ordens sem vontade própria,<br>Abro os meus olhos quando a noite cai.<br>Deslizo sem pés pelo chão afora,<br>Mas sem ti no comando, daqui ninguém sai.<br><br>O que sou?",
-      answers: ["carro", "um carro", "automóvel", "automovel", "um automóvel", "um automovel"],
-      hint: "Agora já estás muito perto de descobrir a natureza do grande prémio."
-    },
-    {
-      question: "Tenho rodas para andar, mas não tenho motor,<br>Engulo a tua roupa com todo o fervor.<br>Vou contigo para longe quando chega o descanso,<br>E volto sempre mais cheia do que quando avanço.<br><br>O que sou?",
-      answers: ["mala", "a mala", "a Mala", "mala de viagem", "a mala de viagem", "bagagem", "a bagagem"],
-      hint: "É o objeto onde arrumas tudo o que precisas levar para uns dias fora."
-    },
-    {
-      question: "Sou o tempo esperado durante o ano inteiro,<br>Quando a rotina fica para trás e o lazer vem primeiro.<br>Trago dias sem pressa, passeios e diversão,<br>Sou a pausa merecida que alegra o coração.<br><br>O que sou?",
-      answers: ["férias", "as férias", "as Férias", "ferias", "as ferias", "as Ferias"],
-      hint: "É a altura do ano em que paras de trabalhar para viajar e descansar."
+    questions: [
 
-    },
-    {
-      question: "Não cabemos no porta-luvas, mas viajamos no coração,<br>Somos o teu porto seguro, em qualquer direção.<br>A prenda que hoje recebes é apenas uma recordação,<br>De quem caminha contigo, com amor e dedicação.<br><br>Quem somos?",
-      answers: ["família", "a família", "a Família", "familia", "a familia", "a Familia"],
-      hint: "Esta é a adivinha mais importante de todas, somos o grupo de pessoas mais importante da tua vida."
-    },
-  ]
+        {
+            question: "Vamos começar pelo mais importante:<br>Para quem foi preparada esta surpresa especial?",
+            answers: ["Sónia", "Sonia"],
+            hint: "É alguém muito especial para quem preparou este jogo."
+        },
+
+        {
+            question: "Tenho uma agulha, mas não sei coser,<br>Não tenho olhos, mas ajudo-te a ver.<br>Aponto o caminho sem nunca falar,<br>E procuro sempre o norte para te guiar.<br><br>O que sou?",
+            answers: ["bússola", "a bússola"],
+            hint: "Pensa num instrumento de orientação."
+        },
+
+        {
+            question: "Levo-te longe, mas nunca dou um passo,<br>Tenho linhas pintadas a marcar o traço.<br>Aguento o peso de quem passa por mim,<br>E ligo o início ao teu destino no fim.<br><br>O que sou?",
+            answers: ["estrada", "uma estrada", "a estrada"],
+            hint: "É por lá que as viagens começam."
+        },
+
+        {
+            question: "Não se compra, não se empresta<br>e nem sempre é fácil de encontrar.<br>Ajuda-nos a esperar pelo momento certo,<br>sem perder o entusiasmo.<br><br>O que é?",
+            answers: ["paciência", "a Paciência"],
+            hint: "É uma virtude essencial para manter a calma quando algo demora."
+        },
+
+        {
+            question: "Sou arredondado, mas não sou uma roda,<br>Sem tocar no chão, decido a rota.<br>Sem mim não há curva nem direção,<br>Viajo sempre agarrado à tua mão.<br><br>O que sou?",
+            answers: ["volante", "o volante"],
+            hint: "É uma peça que encontramos no interior de muitos veículos."
+        },
+
+        {
+            question: "Tenho páginas, mas não conto nenhuma história,<br>Guardo carimbos e datas que ficam na tua memória.<br>Sem mim, não podes cruzar o céu nem o mar,<br>Sou o teu bilhete dourado para o mundo explorar.<br><br>O que sou?",
+            answers: ["passaporte", "o passaporte", "o Passaporte"],
+            hint: "É um documento oficial indispensável para viajar para fora do país."
+        },
+
+        {
+            question: "Não sou farol, mas ajudo a ver,<br>Tudo o que na estrada pode acontecer.<br>Olho nos espelhos e sigo cada sinal,<br>Se me deixares em casa, a viagem corre mal.<br><br>O que sou?",
+            answers: ["atenção", "a atenção", "a Atenção", "concentração", "a concentração", "atento"],
+            hint: "É o oposto da distração quando estamos a conduzir."
+        },
+
+        {
+            question: "Sigo as tuas ordens sem vontade própria,<br>Abro os meus olhos quando a noite cai.<br>Deslizo sem pés pelo chão afora,<br>Mas sem ti no comando, daqui ninguém sai.<br><br>O que sou?",
+            answers: ["carro", "um carro", "automóvel", "automovel", "um automóvel", "um automovel"],
+            hint: "Agora já estás muito perto de descobrir a natureza do grande prémio."
+        },
+
+        {
+            question: "Tenho rodas para andar, mas não tenho motor,<br>Engulo a tua roupa com todo o fervor.<br>Vou contigo para longe quando chega o descanso,<br>E volto sempre mais cheia do que quando avanço.<br><br>O que sou?",
+            answers: ["mala", "a mala", "a Mala", "mala de viagem", "a mala de viagem", "bagagem", "a bagagem"],
+            hint: "É o objeto onde arrumas tudo o que precisas levar para uns dias fora."
+        },
+
+        {
+            question: "Sou o tempo esperado durante o ano inteiro,<br>Quando a rotina fica para trás e o lazer vem primeiro.<br>Trago dias sem pressa, passeios e diversão,<br>Sou a pausa merecida que alegra o coração.<br><br>O que sou?",
+            answers: ["férias", "as férias", "as Férias", "ferias", "as ferias", "as Ferias"],
+            hint: "É a altura do ano em que paras de trabalhar para viajar e descansar."
+        },
+
+        {
+            question: "Não cabemos no porta-luvas, mas viajamos no coração,<br>Somos o teu porto seguro, em qualquer direção.<br>A prenda que hoje recebes é apenas uma recordação,<br>De quem caminha contigo, com amor e dedicação.<br><br>Quem somos?",
+            answers: ["família", "a família", "a Família", "familia", "a familia", "a Familia"],
+            hint: "Esta é a adivinha mais importante de todas, somos o grupo de pessoas mais importante da tua vida."
+        }
+
+    ]
+
 };
 
 
 /* =========================================================
-   RESET PROGRESSO
+   ELEMENTOS E CONFIGURAÇÕES DO SERVIDOR
    ========================================================= */
-async function resetJogo() {
-    if (!confirm("Tens a certeza que pretendes reiniciar o jogo?")) {
-        return;
-    }
-    const link = $("resetLink");
-    link.textContent = "A reiniciar o jogo...";
-    link.style.pointerEvents = "none";
-    try {
-        const resposta = await fetch(CONFIG_GITHUB.api, {
-            method: "POST",
-            headers: {"Content-Type": "application/json"},
-			body: JSON.stringify({action: "RESET"})
-        });
-        const resultado = await resposta.json();
-        if (!resposta.ok || !resultado.success) {
-            throw new Error(resultado.error || "Erro ao reiniciar o jogo.");
-        }
-        alert("O jogo foi reiniciado com sucesso!");
-        location.reload();
-    } catch (error) {
-        console.error("Erro no reset:", error);
-        alert("Não foi possível reiniciar o jogo.\n\n" + error.message);
-        link.textContent = "Uma surpresa pensada especialmente só para ti";
-        link.style.pointerEvents = "auto";
-    }
-}
 
 const $ = (id) => document.getElementById(id);
+
+const CONFIG_GITHUB = {
+    api: "https://grande-jogo-api.lobo-paulo.workers.dev"
+};
+
+let currentQuestion = 0;
+let jogoConcluido = false;
+let jogoIniciado = false;
+let respostaBloqueada = false;
+
+let estadoServidor = null;
+let horaServidorBase = 0;
+let momentoMonotonicoBase = 0;
+
+let intervaloContagem = null;
+let intervaloSincronizacao = null;
+let fase3ConfettiInterval = null;
+
+
 /* =========================================================
    SISTEMA DE ÁUDIO
    ========================================================= */
+
 const successSound = new Audio("Aplausos.mp3");
 const wrongSound = new Audio("Errado.mp3");
 const QuaseSound = new Audio("Quase.mp3");
 const waitSound = new Audio("Espera.mp3");
 const fireworkSound = new Audio("Foguetes.mp3");
+
 let somFasePretendida = 0;
-[successSound, wrongSound, QuaseSound, waitSound, fireworkSound].forEach(audio => {
+
+[
+    successSound,
+    wrongSound,
+    QuaseSound,
+    waitSound,
+    fireworkSound
+].forEach(audio => {
     audio.preload = "auto";
     audio.volume = 0.85;
 });
+
 QuaseSound.loop = true;
 waitSound.loop = true;
 fireworkSound.loop = true;
+
+
 function playSuccessSound() {
     successSound.currentTime = 0;
     successSound.play().catch(() => {});
 }
+
 
 function playWrongSound() {
     wrongSound.currentTime = 0;
     wrongSound.play().catch(() => {});
 }
 
-/* Parar sons das fases */
+
 function stopPhaseSounds() {
     [QuaseSound, waitSound, fireworkSound].forEach(audio => {
         audio.pause();
@@ -284,502 +605,933 @@ function stopPhaseSounds() {
     });
 }
 
-/* Som da Fase 1 */
+
 async function playQuaseSound() {
+
     if (!QuaseSound.paused) return;
+
     waitSound.pause();
     waitSound.currentTime = 0;
+
     fireworkSound.pause();
     fireworkSound.currentTime = 0;
+
     QuaseSound.currentTime = 0;
+
     try {
         await QuaseSound.play();
         $("activateSoundButton").classList.add("hidden");
-        console.log("Som da Fase 1 iniciado.");
     } catch (error) {
-        console.warn("Erro no som da Fase 1:", error);
         $("activateSoundButton").classList.remove("hidden");
     }
 }
 
-/* Som da Fase 2 */
+
 async function playWaitSound() {
+
     if (!waitSound.paused) return;
+
+    QuaseSound.pause();
+    QuaseSound.currentTime = 0;
+
     fireworkSound.pause();
     fireworkSound.currentTime = 0;
+
     waitSound.currentTime = 0;
+
     try {
         await waitSound.play();
         $("activateSoundButton").classList.add("hidden");
     } catch (error) {
-        console.warn("Erro no som da Fase 2:", error);
         $("activateSoundButton").classList.remove("hidden");
     }
 }
 
-/* Som da Fase 3 */
+
 async function playFireworkSound() {
-    // Se já estiver a tocar, não fazer absolutamente nada
+
     if (!fireworkSound.paused) return;
-    // Interromper o som da Fase 2
+
+    QuaseSound.pause();
+    QuaseSound.currentTime = 0;
+
     waitSound.pause();
     waitSound.currentTime = 0;
-    // Iniciar o som da Fase 3
+
     fireworkSound.currentTime = 0;
+
     try {
         await fireworkSound.play();
         $("activateSoundButton").classList.add("hidden");
-        console.log("Som da Fase 3 iniciado com sucesso.");
     } catch (error) {
-        console.error("Erro no som da Fase 3:", error);
         $("activateSoundButton").classList.remove("hidden");
     }
 }
 
-/* Ativação automática do som na primeira interação */
+
+/* Activação automática do som */
+
 function iniciarSomPorInteracao() {
+
     if (somFasePretendida === 0) return;
+
     let som;
-    if (somFasePretendida === 1) {
-        som = QuaseSound;
-    }
-    else if (somFasePretendida === 2) {
-        som = waitSound;
-    }
-    else if (somFasePretendida === 3) {
-        som = fireworkSound;
-    }
+
+    if (somFasePretendida === 1) som = QuaseSound;
+    if (somFasePretendida === 2) som = waitSound;
+    if (somFasePretendida === 3) som = fireworkSound;
+
     if (!som) return;
-    // Parar os outros sons
+
     [QuaseSound, waitSound, fireworkSound].forEach(audio => {
         if (audio !== som) {
             audio.pause();
             audio.currentTime = 0;
         }
     });
+
     som.play().then(() => {
-        console.log("Som iniciado com sucesso.");
+
         $("activateSoundButton").classList.add("hidden");
         removerListenersSom();
-    }).catch(error => {
-        console.warn("O browser bloqueou o áudio:", error);
+
+    }).catch(() => {
+
         $("activateSoundButton").classList.remove("hidden");
+
     });
 }
 
+
 function removerListenersSom() {
+
     window.removeEventListener("pointerdown", iniciarSomPorInteracao);
     window.removeEventListener("mousemove", iniciarSomPorInteracao);
     window.removeEventListener("keydown", iniciarSomPorInteracao);
 
 }
 
-/* Ativação manual do som */
+
+window.addEventListener("pointerdown", iniciarSomPorInteracao);
+window.addEventListener("mousemove", iniciarSomPorInteracao);
+window.addEventListener("keydown", iniciarSomPorInteracao);
+
+
+/* Activação manual do som */
+
 $("activateSoundButton").addEventListener("click", async function() {
+
     try {
+
         stopPhaseSounds();
-        if (somFasePretendida === 1) {
-            await QuaseSound.play();
-        }
-        else if (somFasePretendida === 2) {
-            await waitSound.play();
-        }
-        else if (somFasePretendida === 3) {
-            await fireworkSound.play();
-        }
+
+        if (somFasePretendida === 1) await QuaseSound.play();
+        if (somFasePretendida === 2) await waitSound.play();
+        if (somFasePretendida === 3) await fireworkSound.play();
+
         this.classList.add("hidden");
-    } catch (erro) {
-        console.error("Erro na reprodução do áudio:", erro);
-        this.classList.remove("hidden");
-    }
-});
 
-
-/* =========================================================
-   SISTEMA DE MEMORIZAÇÃO E SINCRONIZAÇÃO
-   CLOUDFLARE WORKER + GITHUB
-   ========================================================= */
-const CONFIG_GITHUB = {
-    api: "https://grande-jogo-api.lobo-paulo.workers.dev"
-};
-const STORAGE_KEY = "grandeJogoDaSorte_progresso";
-
-/* =========================================================
-   LER PROGRESSO
-   ========================================================= */
-async function lerProgresso() {
-    const resposta = await fetch(CONFIG_GITHUB.api, {
-        method: "GET",
-        cache: "no-store"
-    });
-    if (!resposta.ok) {
-        throw new Error("Não foi possível recuperar o progresso.");
-    }
-    const progresso = await resposta.json();
-    return progresso;
-}
-
-/* =========================================================
-   GUARDAR PROGRESSO
-   ========================================================= */
-async function guardarProgresso() {
-    const dados = {
-        pergunta_atual: currentQuestion,
-        perguntas_utilizadas: Array.from(
-            { length: currentQuestion },
-            (_, index) => index
-        ),
-        jogo_concluido: currentQuestion >= CONFIG.questions.length,
-        ultima_atualizacao: new Date().toISOString()
-    };
-    const resposta = await fetch(CONFIG_GITHUB.api, {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify(dados)
-    });
-    const resultado = await resposta.json();
-    if (!resposta.ok || !resultado.success) {
-        throw new Error(
-            resultado.error || "Não foi possível guardar o progresso."
-        );
-    }
-    return true;
-}
-
-/* =========================================================
-   MOTOR DO JOGO — não é necessário editar para mudar perguntas.
-   ========================================================= */
-let currentQuestion = 0;
-let respostaBloqueada = false;
-
-function normalize(value) {
-  return value.trim().toLocaleLowerCase("pt-PT")
-    .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
-    .replace(/[.,!?;:]/g, "").replace(/\s+/g, " ");
-}
-
-function renderQuestion() {
-  const item = CONFIG.questions[currentQuestion];
-  $("levelLabel").textContent = `NÍVEL ${String(currentQuestion + 1).padStart(2,"0")} / ${String(CONFIG.questions.length).padStart(2,"0")}`;
-  $("question").innerHTML = item.question;
-  $("hint").textContent = currentQuestion === 0
-    ? "Só uma resposta certa te permite avançar. Boa sorte!"
-    : "Pista: " + item.hint;
-  $("feedback").textContent = "";
-  $("feedback").className = "feedback";
-  $("answerInput").value = "";
-  $("answerInput").focus();
-  [...$("progress").children].forEach((bar, index) => bar.classList.toggle("done", index < currentQuestion));
-}
-
-$("answerForm").addEventListener("submit", (event) => {
-  event.preventDefault();
-  // Impede novas respostas enquanto aguarda pela próxima pergunta
-  if (respostaBloqueada) return;
-  const answer = normalize($("answerInput").value);
-  if (!answer) return;
-  const accepted = CONFIG.questions[currentQuestion].answers.map(normalize);
-  if (accepted.includes(answer)) {
-    // Bloqueia imediatamente novas submissões
-    respostaBloqueada = true;
-    $("answerInput").disabled = true;
-    $("answerForm").querySelector("button").disabled = true;
-    $("feedback").textContent = "Parabéns, acertaste!! Desbloqueaste o próximo nível...";
-    $("feedback").className = "feedback";
-    [...$("progress").children].forEach((bar, index) =>
-      bar.classList.toggle("done", index <= currentQuestion)
-    );
-    launchConfetti();
-    
-window.setTimeout(async () => {
-    const perguntaAnterior = currentQuestion;
-    currentQuestion++;
-    try {
-        await guardarProgresso();
     } catch (error) {
-        currentQuestion = perguntaAnterior;
-        console.error("Erro ao guardar progresso:", error);
-        $("feedback").textContent =
-            "Acertaste, mas não foi possível guardar o progresso. Verifica a ligação e tenta novamente.";
-        $("feedback").className = "feedback error";
-        respostaBloqueada = false;
-        $("answerInput").disabled = false;
-        $("answerForm").querySelector("button").disabled = false;
-        return;
+
+        this.classList.remove("hidden");
+
     }
-    if (currentQuestion < CONFIG.questions.length) {
-        renderQuestion();
-    } else {
-        $("game").classList.add("hidden");
-        $("introScreen").classList.add("hidden");
-        $("finalScreen").classList.remove("hidden");
-        startCountdown();
-    }
-    respostaBloqueada = false;
-    $("answerInput").disabled = false;
-    $("answerForm").querySelector("button").disabled = false;
-}, 7000);
-  } else {
-    $("feedback").textContent = "Não seja molengão, joga com o coração. Só avanças se deres a resposta certa...";
-    $("feedback").className = "feedback error";
-    $("answerInput").select();
-    playWrongSound();
-  }
+
 });
 
+
 /* =========================================================
-   SINCRONIZAÇÃO DA HORA COM O SERVIDOR CLOUDFLARE
+   COMUNICAÇÃO COM O CLOUDFLARE WORKER
    ========================================================= */
-let diferencaHoraServidor = 0;
-let horaServidorSincronizada = false;
-let intervaloContagem = null;
-let intervaloSincronizacao = null;
-async function sincronizarHoraServidor() {
-    const inicioPedido = performance.now();
+
+async function obterEstadoServidor() {
+
     const resposta = await fetch(
-        CONFIG_GITHUB.api + "?action=time&_=" + Date.now(),
+        CONFIG_GITHUB.api + "?action=game&_=" + Date.now(),
         {
             method: "GET",
             cache: "no-store"
         }
     );
-    const fimPedido = performance.now();
+
     if (!resposta.ok) {
-        throw new Error("Não foi possível obter a hora do servidor.");
+        throw new Error("Não foi possível consultar o estado oficial do jogo.");
     }
+
     const dados = await resposta.json();
-    const horaServidor = Date.parse(dados.serverTime);
-    if (!Number.isFinite(horaServidor)) {
-        throw new Error("A hora recebida do servidor é inválida.");
+
+    if (
+        dados.success !== true ||
+        ![1, 2, 3].includes(Number(dados.faseAtiva))
+    ) {
+        throw new Error("Resposta inválida do servidor.");
     }
-    // Usa um relógio monotónico, independente da hora do computador.
-    const momentoMedio = (inicioPedido + fimPedido) / 2;
-    diferencaHoraServidor = horaServidor - momentoMedio;
-    horaServidorSincronizada = true;
-    console.log(
-        "Hora UTC do servidor sincronizada:",
-        new Date(obterHoraServidor()).toISOString()
-    );
+
+    const hora = Date.parse(dados.serverTime);
+
+    if (!Number.isFinite(hora)) {
+        throw new Error("Hora oficial do servidor inválida.");
+    }
+
+    estadoServidor = dados;
+
+    horaServidorBase = hora;
+    momentoMonotonicoBase = performance.now();
+
+    return dados;
 }
+
 
 function obterHoraServidor() {
-    if (!horaServidorSincronizada) {
-        throw new Error("Hora do servidor ainda não sincronizada.");
+
+    if (!estadoServidor) {
+        throw new Error("Servidor ainda não sincronizado.");
     }
-    return performance.now() + diferencaHoraServidor;
+
+    return horaServidorBase +
+        (performance.now() - momentoMonotonicoBase);
+
 }
 
-/* Contagem decrescente e desbloqueio automático das coordenadas. */
-function startCountdown() {
-  const firstTarget = Date.UTC(2026, 11, 24, 20, 0, 0);  // Fase 1 termina: 24 de dezembro de 2026 às 20:00 GMT
-  const secondTarget = Date.UTC(2027, 1, 22, 0, 0, 0);   // Fase 2 termina: 22 de fevereiro de 2027 às 00:00 GMT
-  
-  function update() {
-    if (!horaServidorSincronizada) return;
-    const now = obterHoraServidor();
-    
-    // ==========================================
-    // FASE 1 - ANTES DE 24 DE DEZEMBRO ÀS 20:00
-    // ==========================================
-    if (now < firstTarget) {
-      // Som contínuo da Fase 1
-      somFasePretendida = 1;
-      waitSound.pause();
-      waitSound.currentTime = 0;
-      fireworkSound.pause();
-      fireworkSound.currentTime = 0;
-      playQuaseSound();
-      $("activateSoundButton").classList.add("hidden");
-      const distance = firstTarget - now;
-      const days = Math.floor(distance / 86400000);
-      const hours = Math.floor((distance % 86400000) / 3600000);
-      $("frasepremio").textContent = "O grande prémio esta a um passo!";
-      $("msgpremio").textContent = "Conseguiste chegar até aqui. Já sabes qual é a surpresa?";
-      $("msgpremiobold").textContent = "Esta a ser preparado com carinho para ti, mas envolto de muito mistério.";
-      $("msgrevelacao").textContent = "DIAS ATÉ À PRÓXIMA REVELAÇÃO";
-      $("msgdofinal").textContent = "Até lá, podes tentar adivinhar, pois algumas surpresas sabem melhores quando ficam em segredo.";
-      $("daysLeft").textContent = days;
-      $("countDetail").textContent =
-        `Faltam ${days} dias e ${hours} horas. Nessa noite, novas revelações acerca do teu prémio vão surgir.`;
-      $("gpsBox").classList.add("hidden");
+
+/* =========================================================
+   PROGRESSO NO GITHUB
+   ========================================================= */
+
+async function lerProgresso() {
+
+    const resposta = await fetch(CONFIG_GITHUB.api, {
+        method: "GET",
+        cache: "no-store"
+    });
+
+    if (!resposta.ok) {
+        throw new Error("Não foi possível recuperar o progresso.");
     }
-    // ==========================================
-    // FASE 2 - A PARTIR DE 24 DE DEZEMBRO ÀS 20:00
-    // ==========================================
-    else if (now < secondTarget) {
-      // Reproduzir som da Fase 2
-      somFasePretendida = 2;
-      playWaitSound();
-      const distance = secondTarget - now;
-      const days = Math.floor(distance / 86400000);
-      const hours = Math.floor((distance % 86400000) / 3600000);
-      $("frasepremio").textContent = "O grande prémio é teu!";
-      $("msgpremio").textContent = "Conseguiste aguentar até aqui, e vais ter de ter um pouco mais de paciência.";
-      $("msgpremiobold").textContent = "Ainda não esta pronto, mas não deves de desanimar. Toma lá mais esta pista.";
-      $("msgrevelacao").textContent = "DIAS ATÉ À REVELAÇÃO FINAL";
-      $("msgdofinal").innerHTML = "Quanto o tempo acabar, uma última pista de tou dar. Obstante, já sabes qual é a surpresa?";
-      $("daysLeft").textContent = days;
-      $("countDetail").textContent =
-        `Faltam ${days} dias e ${hours} horas para poderes reclamar o teu prémio!`;
-      // Desbloqueia as coordenadas GPS
-      $("gpsBox").classList.remove("hidden");
-      $("gpsCoordinates").textContent = CONFIG.gpsCoordinates;
-      const parts = CONFIG.gpsCoordinates.split(",").map(v => v.trim());
-      if (parts.length === 2 && !/X/i.test(CONFIG.gpsCoordinates)) {
-        $("mapLink").href =
-          "https://www.google.com/maps?q=" + encodeURIComponent(parts.join(","));
-        $("mapLink").classList.remove("hidden");
-      } else {
-        $("mapLink").classList.add("hidden");
-        $("gpsCoordinates").textContent =
-          "O teu destino será anunciado em breve. Sê paciente...";
-      }
-    }
-    // ==========================================
-    // FASE 3 - A PARTIR DE 22 DE FEVEREIRO
-    // ==========================================
-    else {
-      // Reproduzir som da Fase 3
-      somFasePretendida = 3;
-      playFireworkSound();
 
-      // Confettis sem limite de repetições
-      if (fase3ConfettiInterval === null) {
+    return await resposta.json();
 
-          // Primeira explosão imediata
-          launchConfetti(false);
-
-          // Novas explosões a cada 3 segundos
-          fase3ConfettiInterval = setInterval(function() {
-              launchConfetti(false);
-          }, 3000);
-      }
-      $("daysLeft").textContent = "0";
-      $("frasepremio").textContent = "Finalmente, o grande prémio é teu.";
-      $("msgpremio").textContent = "A paciência é uma virtude e já o podes reclamar.";
-      $("msgpremiobold").textContent = "";
-      $("msgrevelacao").textContent = "DIAS ATÉ À REVELAÇÃO FINAL";
-      $("msgdofinal").innerHTML = "Vim da Alemanha a acelerar, com os meus anéis a brilhar. <br>Não fui às Olimpíadas competir, e o meu nome significa ouvir. Quem sou?";
-      $("countDetail").textContent =
-        "Finalmente, podes reclamar o teu prémio";
-      $("gpsBox").classList.remove("hidden");
-      $("gpsCoordinates").textContent = CONFIG.gpsCoordinates;
-      const parts = CONFIG.gpsCoordinates.split(",").map(v => v.trim());
-      if (parts.length === 2 && !/X/i.test(CONFIG.gpsCoordinates)) {
-        $("mapLink").href =
-          "https://www.google.com/maps?q=" + encodeURIComponent(parts.join(","));
-        $("mapLink").classList.remove("hidden");
-      } else {
-        $("mapLink").classList.add("hidden");
-        $("gpsCoordinates").textContent =
-          "O teu destino será anunciado em breve.";
-      }
-    }
-  }
-    // Primeira sincronização com o servidor
-  async function iniciarContagem() {
-      try {
-          await sincronizarHoraServidor();
-          update();
-      } catch (error) {
-          console.error("Erro na sincronização horária:", error);
-          $("countDetail").textContent =
-              "A sincronizar com o servidor. Aguarda alguns instantes...";
-      }
-      // Actualizar a contagem a cada 10 segundos
-      if (intervaloContagem === null) {
-          intervaloContagem = window.setInterval(update, 10000);
-      }
-      // Voltar a sincronizar a hora a cada 30 segundos
-      if (intervaloSincronizacao === null) {
-          intervaloSincronizacao = window.setInterval(async function() {
-              try {
-                  await sincronizarHoraServidor();
-                  update();
-              } catch (error) {
-
-                  console.error("Erro ao actualizar a hora do servidor:", error);
-              }
-          }, 30000);
-      }
-  }
-  iniciarContagem();
 }
 
-/* Pequena explosão de confettis em cada resposta certa. */
+
+async function guardarProgresso() {
+
+    const dados = {
+
+        pergunta_atual: currentQuestion,
+
+        perguntas_utilizadas: Array.from(
+            { length: currentQuestion },
+            (_, index) => index
+        ),
+
+        jogo_concluido:
+            currentQuestion >= CONFIG.questions.length,
+
+        ultima_atualizacao:
+            new Date().toISOString()
+
+    };
+
+    const resposta = await fetch(CONFIG_GITHUB.api, {
+
+        method: "POST",
+
+        headers: {
+            "Content-Type": "application/json"
+        },
+
+        body: JSON.stringify(dados)
+
+    });
+
+    const resultado = await resposta.json();
+
+    if (!resposta.ok || !resultado.success) {
+
+        throw new Error(
+            resultado.error ||
+            "Não foi possível guardar o progresso."
+        );
+
+    }
+
+    return true;
+
+}
+
+
+/* =========================================================
+   RESET DO PROGRESSO
+   ========================================================= */
+
+async function resetJogo() {
+
+    if (!confirm("Tens a certeza que pretendes reiniciar o jogo?")) {
+        return;
+    }
+
+    const link = $("resetLink");
+
+    link.textContent = "A reiniciar o jogo...";
+    link.style.pointerEvents = "none";
+
+    try {
+
+        const resposta = await fetch(CONFIG_GITHUB.api, {
+
+            method: "POST",
+
+            headers: {
+                "Content-Type": "application/json"
+            },
+
+            body: JSON.stringify({
+                action: "RESET"
+            })
+
+        });
+
+        const resultado = await resposta.json();
+
+        if (!resposta.ok || !resultado.success) {
+
+            throw new Error(
+                resultado.error ||
+                "Erro ao reiniciar o jogo."
+            );
+
+        }
+
+        alert("O jogo foi reiniciado com sucesso!");
+
+        location.reload();
+
+    } catch (error) {
+
+        console.error("Erro no reset:", error);
+
+        alert(
+            "Não foi possível reiniciar o jogo.\n\n" +
+            error.message
+        );
+
+        link.textContent =
+            "Uma surpresa pensada especialmente só para ti";
+
+        link.style.pointerEvents = "auto";
+
+    }
+
+}
+
+
+/* =========================================================
+   MOTOR DO JOGO
+   ========================================================= */
+
+function normalize(value) {
+
+    return value.trim()
+        .toLocaleLowerCase("pt-PT")
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .replace(/[.,!?;:]/g, "")
+        .replace(/\s+/g, " ");
+
+}
+
+
+function renderQuestion() {
+
+    const item = CONFIG.questions[currentQuestion];
+
+    $("levelLabel").textContent =
+        `NÍVEL ${String(currentQuestion + 1).padStart(2,"0")} / ${String(CONFIG.questions.length).padStart(2,"0")}`;
+
+    $("question").innerHTML = item.question;
+
+    $("hint").textContent =
+        currentQuestion === 0
+            ? "Só uma resposta certa te permite avançar. Boa sorte!"
+            : "Pista: " + item.hint;
+
+    $("feedback").textContent = "";
+    $("feedback").className = "feedback";
+
+    $("answerInput").value = "";
+
+    $("answerInput").disabled = false;
+
+    $("answerForm").querySelector("button").disabled = false;
+
+    [...$("progress").children].forEach((bar, index) => {
+        bar.classList.toggle("done", index < currentQuestion);
+    });
+
+    $("answerInput").focus();
+
+}
+
+
+/* =========================================================
+   VALIDAÇÃO DAS RESPOSTAS
+   ========================================================= */
+
+$("answerForm").addEventListener("submit", event => {
+
+    event.preventDefault();
+
+    if (respostaBloqueada) return;
+
+    if (currentQuestion >= CONFIG.questions.length) return;
+
+    const answer = normalize($("answerInput").value);
+
+    if (!answer) return;
+
+    const accepted =
+        CONFIG.questions[currentQuestion].answers.map(normalize);
+
+    if (accepted.includes(answer)) {
+
+        respostaBloqueada = true;
+
+        $("answerInput").disabled = true;
+
+        $("answerForm").querySelector("button").disabled = true;
+
+        $("feedback").textContent =
+            "Parabéns, acertaste!! Desbloqueaste o próximo nível...";
+
+        $("feedback").className = "feedback";
+
+        [...$("progress").children].forEach((bar, index) => {
+            bar.classList.toggle("done", index <= currentQuestion);
+        });
+
+        launchConfetti();
+
+        window.setTimeout(async () => {
+
+            const perguntaAnterior = currentQuestion;
+
+            currentQuestion++;
+
+            try {
+
+                await guardarProgresso();
+
+            } catch (error) {
+
+                currentQuestion = perguntaAnterior;
+
+                console.error("Erro ao guardar progresso:", error);
+
+                $("feedback").textContent =
+                    "Acertaste, mas não foi possível guardar o progresso. Verifica a ligação e tenta novamente.";
+
+                $("feedback").className = "feedback error";
+
+                respostaBloqueada = false;
+
+                $("answerInput").disabled = false;
+
+                $("answerForm").querySelector("button").disabled = false;
+
+                return;
+
+            }
+
+            if (currentQuestion < CONFIG.questions.length) {
+
+                renderQuestion();
+
+            } else {
+
+                $("game").classList.add("hidden");
+
+                $("introScreen").classList.add("hidden");
+
+                $("finalScreen").classList.remove("hidden");
+
+                iniciarContagem();
+
+            }
+
+            respostaBloqueada = false;
+
+            $("answerInput").disabled = false;
+
+            $("answerForm").querySelector("button").disabled = false;
+
+        }, 7000);
+
+    } else {
+
+        $("feedback").textContent =
+            "Não seja molengão, joga com o coração. Só avanças se deres a resposta certa...";
+
+        $("feedback").className = "feedback error";
+
+        $("answerInput").select();
+
+        playWrongSound();
+
+    }
+
+});
+
+
+/* =========================================================
+   APRESENTAÇÃO DAS COORDENADAS GPS
+   ========================================================= */
+
+function atualizarGPS(dados) {
+
+    const gpsBox = $("gpsBox");
+
+    // Por defeito, esconder sempre o GPS.
+
+    gpsBox.classList.add("hidden");
+
+    $("gpsCoordinates").textContent = "";
+
+    $("mapLink").href = "#";
+
+    $("mapLink").classList.add("hidden");
+
+    if (
+        dados.faseAtiva >= 2 &&
+        dados.gpsDisponivel === true &&
+        dados.coordenadas &&
+        Number.isFinite(Number(dados.coordenadas.latitude)) &&
+        Number.isFinite(Number(dados.coordenadas.longitude))
+    ) {
+
+        const latitude = Number(dados.coordenadas.latitude);
+        const longitude = Number(dados.coordenadas.longitude);
+
+        const coordenadas = `${latitude}, ${longitude}`;
+
+        $("gpsCoordinates").textContent = coordenadas;
+
+        $("mapLink").href =
+            "https://www.google.com/maps?q=" +
+            encodeURIComponent(coordenadas);
+
+        $("mapLink").classList.remove("hidden");
+
+        gpsBox.classList.remove("hidden");
+
+    }
+
+}
+
+
+/* =========================================================
+   CONTAGEM DECRESCENTE
+   ========================================================= */
+
+function atualizarContagem() {
+
+    if (!estadoServidor) return;
+
+    const fase = Number(estadoServidor.faseAtiva);
+
+    const agora = obterHoraServidor();
+
+    const proximaFase = estadoServidor.proximaFaseEm
+        ? Date.parse(estadoServidor.proximaFaseEm)
+        : null;
+
+    // ==========================================
+    // FASE 1
+    // ==========================================
+
+    if (fase === 1) {
+
+        somFasePretendida = 1;
+
+        playQuaseSound();
+
+        $("frasepremio").textContent =
+            "O grande prémio está a um passo!";
+
+        $("msgpremio").textContent =
+            "Conseguiste chegar até aqui. Já sabes qual é a surpresa?";
+
+        $("msgpremiobold").textContent =
+            "Está a ser preparado com carinho para ti, mas envolto em muito mistério.";
+
+        $("msgrevelacao").textContent =
+            "DIAS ATÉ À PRÓXIMA REVELAÇÃO";
+
+        $("msgdofinal").textContent =
+            "Até lá, podes tentar adivinhar, pois algumas surpresas sabem melhor quando ficam em segredo.";
+
+        atualizarGPS({
+            faseAtiva: 1,
+            gpsDisponivel: false
+        });
+
+    }
+
+    // ==========================================
+    // FASE 2
+    // ==========================================
+
+    else if (fase === 2) {
+
+        somFasePretendida = 2;
+
+        playWaitSound();
+
+        $("frasepremio").textContent =
+            "O grande prémio é teu!";
+
+        $("msgpremio").textContent =
+            "Conseguiste aguentar até aqui, e vais ter de ter um pouco mais de paciência.";
+
+        $("msgpremiobold").textContent =
+            "Ainda não está pronto, mas não deves desanimar. Toma lá mais esta pista.";
+
+        $("msgrevelacao").textContent =
+            "DIAS ATÉ À REVELAÇÃO FINAL";
+
+        $("msgdofinal").innerHTML =
+            "Quando o tempo acabar, uma última pista te vou dar. Entretanto, já sabes qual é a surpresa?";
+
+        atualizarGPS(estadoServidor);
+
+    }
+
+    // ==========================================
+    // FASE 3
+    // ==========================================
+
+    else if (fase === 3) {
+
+        somFasePretendida = 3;
+
+        playFireworkSound();
+
+        if (fase3ConfettiInterval === null) {
+
+            launchConfetti(false);
+
+            fase3ConfettiInterval = setInterval(() => {
+                launchConfetti(false);
+            }, 3000);
+
+        }
+
+        $("frasepremio").textContent =
+            "Finalmente, o grande prémio é teu.";
+
+        $("msgpremio").textContent =
+            "A paciência é uma virtude e já o podes reclamar.";
+
+        $("msgpremiobold").textContent = "";
+
+        $("msgrevelacao").textContent =
+            "REVELAÇÃO FINAL";
+
+        // A mensagem só pode vir do servidor.
+
+        if (
+            typeof estadoServidor.mensagemFase3 === "string" &&
+            estadoServidor.mensagemFase3.length > 0
+        ) {
+
+            $("msgdofinal").textContent =
+                estadoServidor.mensagemFase3;
+
+        } else {
+
+            $("msgdofinal").textContent =
+                "A revelação final está a ser preparada. Aguarda um instante.";
+
+        }
+
+        $("daysLeft").textContent = "0";
+
+        $("countDetail").textContent =
+            "Finalmente, podes reclamar o teu prémio.";
+
+        atualizarGPS(estadoServidor);
+
+    }
+
+    // ==========================================
+    // CONTAGEM DECRESCENTE
+    // A data de desbloqueio vem do servidor.
+    // ==========================================
+
+    if (fase === 1 || fase === 2) {
+
+        if (proximaFase && Number.isFinite(proximaFase)) {
+
+            const distancia = Math.max(0, proximaFase - agora);
+
+            const dias = Math.floor(distancia / 86400000);
+
+            const horas = Math.floor(
+                (distancia % 86400000) / 3600000
+            );
+
+            $("daysLeft").textContent = dias;
+
+            $("countDetail").textContent =
+                `Faltam ${dias} dias e ${horas} horas para a próxima revelação.`;
+
+        } else {
+
+            $("daysLeft").textContent = "--";
+
+            $("countDetail").textContent =
+                "A aguardar a próxima revelação.";
+
+        }
+
+    }
+
+}
+
+
+/* =========================================================
+   SINCRONIZAÇÃO COM O SERVIDOR
+   ========================================================= */
+
+async function sincronizarEstadoJogo() {
+
+    const dados = await obterEstadoServidor();
+
+    atualizarContagem();
+
+    return dados;
+
+}
+
+
+async function iniciarContagem() {
+
+    try {
+
+        await sincronizarEstadoJogo();
+
+    } catch (error) {
+
+        console.error("Erro na sincronização:", error);
+
+        $("daysLeft").textContent = "--";
+
+        $("countDetail").textContent =
+            "Não foi possível contactar o servidor. As informações protegidas permanecem bloqueadas.";
+
+        atualizarGPS({
+            faseAtiva: 1,
+            gpsDisponivel: false
+        });
+
+    }
+
+    if (intervaloContagem === null) {
+
+        intervaloContagem = window.setInterval(() => {
+
+            if (!estadoServidor) return;
+
+            atualizarContagem();
+
+        }, 10000);
+
+    }
+
+    if (intervaloSincronizacao === null) {
+
+        intervaloSincronizacao = window.setInterval(async () => {
+
+            try {
+
+                await sincronizarEstadoJogo();
+
+            } catch (error) {
+
+                console.error(
+                    "Erro ao actualizar o estado do servidor:",
+                    error
+                );
+
+                // Em caso de erro, esconder informação protegida.
+
+                atualizarGPS({
+                    faseAtiva: 1,
+                    gpsDisponivel: false
+                });
+
+            }
+
+        }, 30000);
+
+    }
+
+}
+
+
+/* =========================================================
+   CONFETTIS
+   ========================================================= */
+
 const canvas = $("confetti");
 const ctx = canvas.getContext("2d");
+
 let particles = [];
 let animationFrame = null;
-let fase3ConfettiInterval = null;
+
 
 function resizeCanvas() {
-  const ratio = Math.min(window.devicePixelRatio || 1, 2);
-  canvas.width = Math.floor(window.innerWidth * ratio);
-  canvas.height = Math.floor(window.innerHeight * ratio);
-  ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
+
+    const ratio = Math.min(window.devicePixelRatio || 1, 2);
+
+    canvas.width = Math.floor(window.innerWidth * ratio);
+
+    canvas.height = Math.floor(window.innerHeight * ratio);
+
+    ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
+
 }
+
+
 window.addEventListener("resize", resizeCanvas);
+
 resizeCanvas();
 
+
 function launchConfetti(reproduzirSom = true) {
-  if (reproduzirSom) playSuccessSound();
-  if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-  const width = window.innerWidth;
-  const height = window.innerHeight;
-  for (let i = 0; i < 800; i++) {
-    particles.push({
-      x: width * (0.25 + Math.random() * 0.5),
-      y: height * 0.34,
-      vx: (Math.random() - 0.5) * 9,
-      vy: -Math.random() * 9 - 2,
-      gravity: 0.18 + Math.random() * 0.12,
-      size: 3 + Math.random() * 5,
-      life: 85 + Math.random() * 35,
-      rotation: Math.random() * 6,
-      spin: (Math.random() - 0.5) * 0.2,
-      color: ["#e9bd62","#ffdf91","#ffffff","#9fb6d4","#72d6a0"][Math.floor(Math.random()*5)]
-    });
-  }
-  if (!animationFrame) {
-    animateConfetti(); 
-  }
-    
+
+    if (reproduzirSom) playSuccessSound();
+
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+        return;
+    }
+
+    const width = window.innerWidth;
+    const height = window.innerHeight;
+
+    for (let i = 0; i < 800; i++) {
+
+        particles.push({
+
+            x: width * (0.25 + Math.random() * 0.5),
+
+            y: height * 0.34,
+
+            vx: (Math.random() - 0.5) * 9,
+
+            vy: -Math.random() * 9 - 2,
+
+            gravity: 0.18 + Math.random() * 0.12,
+
+            size: 3 + Math.random() * 5,
+
+            life: 85 + Math.random() * 35,
+
+            rotation: Math.random() * 6,
+
+            spin: (Math.random() - 0.5) * 0.2,
+
+            color: [
+                "#e9bd62",
+                "#ffdf91",
+                "#ffffff",
+                "#9fb6d4",
+                "#72d6a0"
+            ][Math.floor(Math.random() * 5)]
+
+        });
+
+    }
+
+    if (!animationFrame) {
+        animateConfetti();
+    }
+
 }
 
+
 function animateConfetti() {
-  ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
-  particles = particles.filter(p => p.life > 0);
-  for (const p of particles) {
-    p.x += p.vx; p.y += p.vy; p.vy += p.gravity; p.rotation += p.spin; p.life--;
-    ctx.save();
-    ctx.translate(p.x, p.y);
-    ctx.rotate(p.rotation);
-    ctx.fillStyle = p.color;
-    ctx.fillRect(-p.size/2, -p.size/2, p.size, p.size * 1.6);
-    ctx.restore();
-  }
-  if (particles.length) animationFrame = requestAnimationFrame(animateConfetti);
-  else {
-    cancelAnimationFrame(animationFrame);
-    animationFrame = null;
-    ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
-  }
+
+    ctx.clearRect(
+        0,
+        0,
+        window.innerWidth,
+        window.innerHeight
+    );
+
+    particles = particles.filter(p => p.life > 0);
+
+    for (const p of particles) {
+
+        p.x += p.vx;
+        p.y += p.vy;
+        p.vy += p.gravity;
+        p.rotation += p.spin;
+        p.life--;
+
+        ctx.save();
+
+        ctx.translate(p.x, p.y);
+
+        ctx.rotate(p.rotation);
+
+        ctx.fillStyle = p.color;
+
+        ctx.fillRect(
+            -p.size / 2,
+            -p.size / 2,
+            p.size,
+            p.size * 1.6
+        );
+
+        ctx.restore();
+
+    }
+
+    if (particles.length) {
+
+        animationFrame = requestAnimationFrame(animateConfetti);
+
+    } else {
+
+        cancelAnimationFrame(animationFrame);
+
+        animationFrame = null;
+
+        ctx.clearRect(
+            0,
+            0,
+            window.innerWidth,
+            window.innerHeight
+        );
+
+    }
+
 }
 
 
 /* =========================================================
    INICIALIZAÇÃO DO JOGO
    ========================================================= */
-let jogoConcluido = false;
-let jogoIniciado = false;
-// Recupera o progresso sem mostrar ainda as perguntas.
+
 async function iniciarJogo() {
+
     $("startButton").disabled = true;
+
     try {
+
         const progresso = await lerProgresso();
+
         currentQuestion = Math.max(
             0,
             Math.min(
@@ -787,54 +1539,111 @@ async function iniciarJogo() {
                 CONFIG.questions.length
             )
         );
-        jogoConcluido = currentQuestion >= CONFIG.questions.length;
+
+        jogoConcluido =
+            currentQuestion >= CONFIG.questions.length;
+
         $("startButton").disabled = false;
-        // SE O JOGO JÁ ESTIVER CONCLUÍDO
+
         if (jogoConcluido) {
+
             $("introScreen").classList.add("hidden");
+
             $("game").classList.add("hidden");
+
             $("finalScreen").classList.remove("hidden");
+
             jogoIniciado = true;
-            startCountdown();
+
+            iniciarContagem();
+
         }
+
     } catch (error) {
+
         console.error(error);
+
         $("startButton").disabled = false;
+
         $("feedback").textContent =
             "Não foi possível recuperar o progresso. Verifica a ligação à Internet e tenta novamente.";
+
         $("feedback").className = "feedback error";
+
     }
+
 }
-// Só começa quando carregar no botão.
+
+
+/* =========================================================
+   BOTÃO COMEÇAR
+   ========================================================= */
+
 $("startButton").addEventListener("click", () => {
+
     if (jogoIniciado) return;
+
     jogoIniciado = true;
+
     $("introScreen").classList.add("hidden");
+
     if (jogoConcluido) {
+
         $("finalScreen").classList.remove("hidden");
-        startCountdown();
+
+        iniciarContagem();
+
     } else {
+
         $("game").classList.remove("hidden");
+
         renderQuestion();
+
     }
-});
- 
-let numeroCliques = 0;
-let temporizadorCliques = null;
-$("resetLink").addEventListener("click", function() {
-    numeroCliques++;
-    clearTimeout(temporizadorCliques);
-    if (numeroCliques === 3) {
-        numeroCliques = 0;
-        resetJogo();
-    } else {
-        temporizadorCliques = setTimeout(function() {
-            numeroCliques = 0;
-        }, 700);
-    }
+
 });
 
+
+/* =========================================================
+   RESET - TRÊS CLIQUES
+   ========================================================= */
+
+let numeroCliques = 0;
+
+let temporizadorCliques = null;
+
+$("resetLink").addEventListener("click", function() {
+
+    numeroCliques++;
+
+    clearTimeout(temporizadorCliques);
+
+    if (numeroCliques === 3) {
+
+        numeroCliques = 0;
+
+        resetJogo();
+
+    } else {
+
+        temporizadorCliques = setTimeout(() => {
+
+            numeroCliques = 0;
+
+        }, 700);
+
+    }
+
+});
+
+
+/* =========================================================
+   ARRANQUE
+   ========================================================= */
+
 iniciarJogo();
+
 </script>
+
 </body>
 </html>
